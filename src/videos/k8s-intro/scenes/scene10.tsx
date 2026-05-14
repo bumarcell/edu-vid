@@ -53,9 +53,9 @@ export default makeScene2D(function* (view) {
         <Host name="Worker Node" width={HOST_W} height={HOST_H} x={-HOST_X} />
         <Host name="Worker Node" width={HOST_W} height={HOST_H} x={0} />
         <Host name="Worker Node" width={HOST_W} height={HOST_H} x={HOST_X} />
-        <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
+        <Container name="my-app" ip="10.244.1.7" x={-HOST_X} y={50} />
         <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
-        <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+        <Container name="my-app" ip="10.244.3.41" x={HOST_X} y={50} />
         {/* The cog on each host — currently labeled "watcher" from scene 9.
             Beat 3 renames each one to "kubelet". */}
         <Controller ref={watcherA} label="watcher" x={-HOST_X} y={-115} />

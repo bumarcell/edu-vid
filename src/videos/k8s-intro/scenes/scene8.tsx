@@ -41,9 +41,9 @@ export default makeScene2D(function* (view) {
       <Host name="Host A" width={HOST_W} height={HOST_H} x={-HOST_X} />
       <Host name="Host B" width={HOST_W} height={HOST_H} x={0} />
       <Host name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
-      <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
+      <Container name="my-app" ip="10.244.1.7" x={-HOST_X} y={50} />
       <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
-      <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+      <Container name="my-app" ip="10.244.3.41" x={HOST_X} y={50} />
       <Controller ref={watcherA} label="watcher" x={-HOST_X} y={-115} />
       <Controller ref={watcherB} label="watcher" x={0} y={-115} />
       <Controller ref={watcherC} label="watcher" x={HOST_X} y={-115} />

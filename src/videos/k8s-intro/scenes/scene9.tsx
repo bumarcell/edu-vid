@@ -1,7 +1,8 @@
 import {Layout, Line, makeScene2D, Rect, Txt} from '@motion-canvas/2d';
-import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeInOutCubic, easeOutCubic, spawn, waitFor} from '@motion-canvas/core';
 import {Client} from '@shared/components/Client';
 import {Container} from '@shared/components/Container';
+import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
 import {KubeProxy} from '@shared/components/KubeProxy';
 import {Service} from '@shared/components/Service';
@@ -38,6 +39,9 @@ export default makeScene2D(function* (view) {
   const hostA = createRef<Host>();
   const hostB = createRef<Host>();
   const hostC = createRef<Host>();
+  const watcherA = createRef<Controller>();
+  const watcherB = createRef<Controller>();
+  const watcherC = createRef<Controller>();
   const service = createRef<Service>();
   const proxyA = createRef<KubeProxy>();
   const proxyB = createRef<KubeProxy>();
@@ -51,9 +55,12 @@ export default makeScene2D(function* (view) {
         <Host ref={hostA} name="Host A" width={HOST_W} height={HOST_H} x={-HOST_X} />
         <Host ref={hostB} name="Host B" width={HOST_W} height={HOST_H} x={0} />
         <Host ref={hostC} name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
-        <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
+        <Container name="my-app" ip="10.244.1.7" x={-HOST_X} y={50} />
         <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
-        <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+        <Container name="my-app" ip="10.244.3.41" x={HOST_X} y={50} />
+        <Controller ref={watcherA} label="watcher" x={-HOST_X} y={-115} />
+        <Controller ref={watcherB} label="watcher" x={0} y={-115} />
+        <Controller ref={watcherC} label="watcher" x={HOST_X} y={-115} />
         <Client name="client" x={-700} y={-320} />
         {/* Start with the friendly names from scene 8. */}
         <Service ref={service} name="stable address" x={0} y={-320} />
@@ -72,7 +79,7 @@ export default makeScene2D(function* (view) {
         />
         <Txt
           ref={serviceAside2}
-          text="(really just kube-proxy config)"
+          text="*really just kube-proxy config"
           x={0}
           y={-425}
           fontFamily={theme.font}
@@ -140,6 +147,10 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
+  spawn(watcherA().idle());
+  spawn(watcherB().idle());
+  spawn(watcherC().idle());
+
   // 1. Hold on the full system.
   yield* waitFor(0.9231);
 
@@ -182,8 +193,12 @@ export default makeScene2D(function* (view) {
   yield* waitFor(0.9231);
 
   // 6. The technical-truth aside lands: Service isn't a real thing — it's
-  //    really just kube-proxy configuration.
-  yield* serviceAside2().opacity(0.75, 0.4615);
+  //    really just kube-proxy configuration. The earlier "unfortunate name"
+  //    note fades out as this one fades in.
+  yield* all(
+    serviceAside().opacity(0, 0.4615),
+    serviceAside2().opacity(0.75, 0.4615),
+  );
 
   yield* waitFor(2.8846);
 });

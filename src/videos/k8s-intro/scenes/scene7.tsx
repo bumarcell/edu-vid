@@ -48,7 +48,7 @@ export default makeScene2D(function* (view) {
       <Host name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
       <Container ref={containerA} name="my-app" ip="10.244.1.7" x={-HOST_X} y={50} />
       <Container ref={containerB} name="my-app" ip="10.244.2.13" x={0} y={50} />
-      <Container ref={containerC} name="my-app" ip="10.244.0.41" x={HOST_X} y={50} />
+      <Container ref={containerC} name="my-app" ip="10.244.3.41" x={HOST_X} y={50} />
       <Controller ref={watcherA} label="watcher" x={-HOST_X} y={-115} />
       <Controller ref={watcherB} label="watcher" x={0} y={-115} />
       <Controller ref={watcherC} label="watcher" x={HOST_X} y={-115} />
@@ -94,13 +94,14 @@ export default makeScene2D(function* (view) {
   yield* client().position.x(-700, 0.8077, easeOutCubic);
   yield* waitFor(0.6923);
 
-  // 2. "Their IPs change every time they get rescheduled." — IPs visibly
-  //    cycle to new values, demonstrating the problem.
+  // 2. "Their IPs change every time they get rescheduled." — one pod dies
+  //    as the example: its watcher reacts, the container crashes, then a
+  //    fresh pod spins up with a new IP. The other two stay put.
   yield* all(
-    containerA().changeIp('10.244.1.22', 0.5769),
-    containerB().changeIp('10.244.2.4', 0.5769),
-    containerC().changeIp('10.244.0.58', 0.5769),
+    containerB().crash(),
+    watcherB().pulse(),
   );
+  yield* containerB().restart('10.244.2.4');
   yield* waitFor(0.4615);
 
   // 3. "How does a client even find these copies?" — question marks bloom
