@@ -30,4 +30,4 @@ And the controller-manager runs all those little watchers we kept inventing — 
 
 That's it — at least from far away. Kubernetes isn't magic; it's just the obvious set of things you'd build if you started with one container and kept asking "okay, but what if that breaks?"
 
-We named the pieces today, but we glossed over a lot — how the apiserver actually talks to etcd, what really happens inside the scheduler when it picks a node, how a controller goes from "I noticed something" to "I changed something." Plenty to dig into. We'll go deeper in the next ones.
+We named the pieces today, but we glossed over a lot — how containers are actually configured to run on a node, what the different controllers are for, and how a controller goes from "I noticed something" to "I changed something." Plenty to dig into. We'll go deeper in the next ones.
