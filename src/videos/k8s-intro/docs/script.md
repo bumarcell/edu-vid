@@ -70,6 +70,8 @@
 **Narration:**
 > Now what if traffic spikes? One container can only do so much. But hey — we already have three hosts. Why not run three copies of the container, one per host, and split the work?
 
+→ implemented in `src/videos/k8s-intro/scenes/scene6.tsx`
+
 ---
 
 ## Scene 7 — The routing problem
@@ -78,6 +80,8 @@
 
 **Narration:**
 > Which raises a question: how does a client even *find* these copies? Their IPs change every time they get rescheduled. You don't want callers to care about that.
+
+→ implemented in `src/videos/k8s-intro/scenes/scene7.tsx`
 
 ---
 
@@ -88,6 +92,8 @@
 **Narration:**
 > So we introduce a stable address — a *Service* — that always points at whatever copies are currently healthy. On every host, a little component called **kube-proxy** programs the network so that traffic to the Service gets routed to a live container. The client doesn't know or care which one.
 
+→ implemented in `src/videos/k8s-intro/scenes/scene8.tsx`
+
 ---
 
 ## Scene 9 — The reveal
@@ -97,6 +103,8 @@
 **Narration:**
 > And… congratulations. You've just re-invented Kubernetes. Everything we just built has a name.
 
+→ implemented in `src/videos/k8s-intro/scenes/scene9.tsx`
+
 ---
 
 ## Scene 10 — Naming the pieces (worker side)
@@ -105,6 +113,8 @@
 
 **Narration:**
 > Each host is a **worker node**. On every worker runs a **kubelet** — it's the thing that actually starts your containers, watches them, and reports their status back up the chain. Next to it, the **kube-proxy** we already met, handling the network.
+
+→ implemented in `src/videos/k8s-intro/scenes/scene10.tsx`
 
 ---
 
@@ -128,6 +138,8 @@
 >
 > And the **controller-manager** runs all those little watchers we kept inventing — one controller notices a container died and asks for a replacement; another notices a whole node went silent and reschedules its workloads elsewhere. Dozens of these, each watching one kind of thing and nudging reality back toward what etcd says it should be.
 
+→ implemented in `src/videos/k8s-intro/scenes/scene11.tsx`
+
 ---
 
 ## Scene 12 — Closing
@@ -138,6 +150,8 @@
 > That's it — at least from far away. Kubernetes isn't magic; it's just the obvious set of things you'd build if you started with one container and kept asking "okay, but what if *that* breaks?"
 >
 > We named the pieces today, but we glossed over a lot — how the apiserver actually talks to etcd, what really happens inside the scheduler when it picks a node, how a controller goes from "I noticed something" to "I changed something." Plenty to dig into. We'll go deeper in the next ones.
+
+→ implemented in `src/videos/k8s-intro/scenes/scene12.tsx`
 
 ---
 
@@ -150,10 +164,10 @@
 | 3. Restart mechanism | `src/videos/k8s-intro/scenes/scene3.tsx` | ✅ done |
 | 4. The host dies | `src/videos/k8s-intro/scenes/scene4.tsx` | ✅ done |
 | 5. Multiple hosts | `src/videos/k8s-intro/scenes/scene5.tsx` | ✅ done |
-| 6. Scaling | — | ⏳ pending |
-| 7. Routing problem | — | ⏳ pending |
-| 8. kube-proxy + Service | — | ⏳ pending |
-| 9. The reveal | — | ⏳ pending |
-| 10. Worker side | — | ⏳ pending |
-| 11. Control plane | — | ⏳ pending |
-| 12. Closing | — | ⏳ pending |
+| 6. Scaling | `src/videos/k8s-intro/scenes/scene6.tsx` | ✅ done |
+| 7. Routing problem | `src/videos/k8s-intro/scenes/scene7.tsx` | ✅ done |
+| 8. kube-proxy + Service | `src/videos/k8s-intro/scenes/scene8.tsx` | ✅ done |
+| 9. The reveal | `src/videos/k8s-intro/scenes/scene9.tsx` | ✅ done |
+| 10. Worker side | `src/videos/k8s-intro/scenes/scene10.tsx` | ✅ done |
+| 11. Control plane | `src/videos/k8s-intro/scenes/scene11.tsx` | ✅ done |
+| 12. Closing | `src/videos/k8s-intro/scenes/scene12.tsx` | ✅ done |

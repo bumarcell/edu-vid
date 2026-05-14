@@ -12,6 +12,7 @@ export const theme = {
   hostDead: '#1F2937',
   service: '#B57BFF',
   controlPlane: '#E0B341',
+  controlPlaneFill: 'rgba(224, 179, 65, 0.08)',
   network: '#9BA8B8',
   highlight: '#FFFFFF',
 
