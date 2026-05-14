@@ -1,7 +1,8 @@
 import {makeScene2D, Line} from '@motion-canvas/2d';
-import {all, createRef, easeOutCubic, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeOutCubic, spawn, waitFor} from '@motion-canvas/core';
 import {Container} from '@shared/components/Container';
 import {Controller} from '@shared/components/Controller';
+import {Host} from '@shared/components/Host';
 import {theme} from '@shared/theme';
 
 /**
@@ -16,20 +17,18 @@ export default makeScene2D(function* (view) {
   const controller = createRef<Controller>();
   const watchLine = createRef<Line>();
 
+  // Host and container carry over visually from scene 1/2. The watcher is
+  // new in this scene, appearing INSIDE the host above the container.
   view.add(
     <>
-      <Container ref={container} name="my-app" />
-      <Controller
-        ref={controller}
-        label="watcher"
-        y={-220}
-        opacity={0}
-      />
+      <Host name="Host A" />
+      <Container ref={container} name="my-app" y={50} />
+      <Controller ref={controller} label="watcher" y={-115} opacity={0} />
       <Line
         ref={watchLine}
         points={[
-          [0, -188],
-          [0, -70],
+          [0, -80],
+          [0, -20],
         ]}
         stroke={theme.controlPlane}
         lineWidth={1.5}
@@ -40,8 +39,9 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  // 1. Controller appears, draws a dashed "watching" line to the container.
+  // 1. Watcher appears inside the host, dashed leader line to the container.
   yield* controller().opacity(1, 0.4);
+  spawn(controller().idle());
   yield* all(
     watchLine().opacity(0.6, 0.3),
     watchLine().end(1, 0.5, easeOutCubic),

@@ -48,6 +48,8 @@
 **Narration:**
 > But what if it's not the container that fails — what if the whole machine it's running on goes down? Power, kernel panic, someone tripped over a cable. Now even your restart mechanism is gone.
 
+→ implemented in `src/videos/k8s-intro/scenes/scene4.tsx`
+
 ---
 
 ## Scene 5 — Multiple hosts + free scheduling
@@ -56,6 +58,8 @@
 
 **Narration:**
 > Okay, so let's add more machines. And critically — let's not pin our container to any specific one. We just say "run this thing," and *something* decides which host has room and puts it there. If a host dies, that something just picks another one.
+
+→ implemented in `src/videos/k8s-intro/scenes/scene5.tsx`
 
 ---
 
@@ -144,8 +148,8 @@
 | 1. The container | `src/videos/k8s-intro/scenes/scene1.tsx` | ✅ done |
 | 2. The crash | `src/videos/k8s-intro/scenes/scene2.tsx` | ✅ done |
 | 3. Restart mechanism | `src/videos/k8s-intro/scenes/scene3.tsx` | ✅ done |
-| 4. The host dies | — | ⏳ pending |
-| 5. Multiple hosts | — | ⏳ pending |
+| 4. The host dies | `src/videos/k8s-intro/scenes/scene4.tsx` | ✅ done |
+| 5. Multiple hosts | `src/videos/k8s-intro/scenes/scene5.tsx` | ✅ done |
 | 6. Scaling | — | ⏳ pending |
 | 7. Routing problem | — | ⏳ pending |
 | 8. kube-proxy + Service | — | ⏳ pending |

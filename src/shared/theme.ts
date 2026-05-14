@@ -8,6 +8,8 @@ export const theme = {
   container: '#7DD3C0',
   containerFail: '#E5484D',
   host: '#3E5C76',
+  hostFill: 'rgba(62, 92, 118, 0.08)', // host stroke at 8% — subtle interior tint
+  hostDead: '#1F2937',
   service: '#B57BFF',
   controlPlane: '#E0B341',
   network: '#9BA8B8',
@@ -16,4 +18,5 @@ export const theme = {
   font: 'JetBrains Mono, ui-monospace, monospace',
   labelSize: 32,
   captionSize: 24,
+  hostLabelSize: 26,
 };
