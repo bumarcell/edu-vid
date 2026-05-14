@@ -72,21 +72,21 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  yield* waitFor(0.5);
+  yield* waitFor(1);
 
   // 1. "Worker Node" label appears above the focused host.
-  yield* workerNodeLabel().opacity(1, 0.5);
-  yield* waitFor(0.6);
+  yield* workerNodeLabel().opacity(1, 1);
+  yield* waitFor(1.2);
 
   // 2. kubelet appears.
-  yield* kubelet().opacity(1, 0.5);
-  yield* waitFor(0.5);
+  yield* kubelet().opacity(1, 1);
+  yield* waitFor(1);
 
   // 3. Heartbeat arrow goes upward — kubelet reports up the chain.
   yield* all(
-    heartbeat().opacity(0.6, 0.3),
-    heartbeat().end(1, 0.6, easeOutCubic),
+    heartbeat().opacity(0.6, 0.6),
+    heartbeat().end(1, 1.2, easeOutCubic),
   );
 
-  yield* waitFor(2);
+  yield* waitFor(4);
 });

@@ -37,16 +37,16 @@ export class Container extends Rect {
     const startY = this.position.y();
 
     yield* all(
-      this.stroke(theme.containerFail, 0.25),
-      this.label.fill(theme.containerFail, 0.25),
+      this.stroke(theme.containerFail, 0.5),
+      this.label.fill(theme.containerFail, 0.5),
     );
-    yield* this.position.x(startX + 12, 0.05);
-    yield* this.position.x(startX - 12, 0.05);
-    yield* this.position.x(startX + 8, 0.05);
-    yield* this.position.x(startX, 0.05);
+    yield* this.position.x(startX + 12, 0.1);
+    yield* this.position.x(startX - 12, 0.1);
+    yield* this.position.x(startX + 8, 0.1);
+    yield* this.position.x(startX, 0.1);
     yield* all(
-      this.opacity(0, 0.5),
-      this.position.y(startY + 40, 0.5),
+      this.opacity(0, 1),
+      this.position.y(startY + 40, 1),
     );
   }
 
@@ -55,6 +55,6 @@ export class Container extends Rect {
     this.stroke(theme.container);
     this.label.fill(theme.container);
     this.position.y(startY);
-    yield* this.opacity(1, 0.4);
+    yield* this.opacity(1, 0.8);
   }
 }

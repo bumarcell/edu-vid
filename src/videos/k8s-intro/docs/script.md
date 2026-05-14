@@ -85,12 +85,14 @@
 
 ---
 
-## Scene 8 — kube-proxy + Service
+## Scene 8 — A stable address with on-host routers
 
-**Visual:** A stable virtual IP (a glowing pill labeled "Service") appears in front of the three containers. On each host, a small "kube-proxy" component lights up, drawing rules that forward Service traffic to whichever container is alive. Client now talks to the Service, traffic fans out.
+> The real K8s names — *Service*, *kube-proxy* — are deliberately not used here. They get introduced as the reveal moment in Scene 9.
+
+**Visual:** A glowing purple pill labeled "stable address" appears above the three hosts. On each host, a small chevron labeled "router" lights up. The client now talks to the stable address, which fans traffic out to whichever container is alive.
 
 **Narration:**
-> So we introduce a stable address — a *Service* — that always points at whatever copies are currently healthy. On every host, a little component called **kube-proxy** programs the network so that traffic to the Service gets routed to a live container. The client doesn't know or care which one.
+> So we introduce a stable address — one that always points at whatever copies are currently healthy. And on every host, a little router programs the network so traffic to that address ends up at a live container. The client doesn't know or care which one.
 
 → implemented in `src/videos/k8s-intro/scenes/scene8.tsx`
 
@@ -98,10 +100,10 @@
 
 ## Scene 9 — The reveal
 
-**Visual:** Pull way back. The whole system — hosts, containers, watchers, the Service, kube-proxy — gets enclosed in a glowing outline. Title fades in: **Kubernetes.**
+**Visual:** Hold on the full system. The stage settles smaller. The title **Kubernetes** lands huge over the center, then settles up to a header position while a glowing frame materializes around everything. Then the friendly labels morph into their real K8s names: "stable address" → "Service" (with a self-aware aside that the name is unfortunate), "router" → "kube-proxy".
 
 **Narration:**
-> And… congratulations. You've just re-invented Kubernetes. Everything we just built has a name.
+> And… congratulations. You've just re-invented Kubernetes. Everything we just built has a name. That stable address out there? In Kubernetes, it's called a **Service** — yes, the name is unfortunate. And those little routers on every host? Those are **kube-proxy**.
 
 → implemented in `src/videos/k8s-intro/scenes/scene9.tsx`
 

@@ -35,21 +35,21 @@ export default makeScene2D(function* (view) {
 
   // 1. Container slides in from off-screen left, caption appears below.
   yield* all(
-    container().position.x(0, 0.6, easeOutCubic),
-    container().opacity(1, 0.5),
+    container().position.x(0, 1.2, easeOutCubic),
+    container().opacity(1, 1),
   );
-  yield* caption().opacity(1, 0.4);
-  yield* waitFor(1.5);
+  yield* caption().opacity(1, 0.8);
+  yield* waitFor(3);
 
   // 2. "…let's abstract away where it runs — pretend it just lives somewhere,
   //    on some machine." Host fades in around the container; the container
   //    drops into its in-host position; the caption fades out.
   yield* all(
-    host().opacity(1, 0.7),
-    container().position.y(50, 0.7, easeOutCubic),
-    caption().opacity(0, 0.4),
+    host().opacity(1, 1.4),
+    container().position.y(50, 1.4, easeOutCubic),
+    caption().opacity(0, 0.8),
   );
 
   // 3. "It's up. It's serving traffic. Life is good." Hold.
-  yield* waitFor(3);
+  yield* waitFor(6);
 });

@@ -69,15 +69,15 @@ export default makeScene2D(function* (view) {
   );
 
   // 1. Client slides in from off-screen left.
-  yield* client().position.x(-870, 0.7, easeOutCubic);
-  yield* waitFor(0.6);
+  yield* client().position.x(-870, 1.4, easeOutCubic);
+  yield* waitFor(1.2);
 
   // 2. Three question marks bloom above the containers.
   yield* all(
-    q1().opacity(1, 0.4),
-    q2().opacity(1, 0.4),
-    q3().opacity(1, 0.4),
+    q1().opacity(1, 0.8),
+    q2().opacity(1, 0.8),
+    q3().opacity(1, 0.8),
   );
 
-  yield* waitFor(2.5);
+  yield* waitFor(5);
 });

@@ -13,11 +13,12 @@ const HOST_GAP = 60;
 const HOST_X = HOST_W + HOST_GAP;
 
 /**
- * Scene 8 — kube-proxy + Service.
- * Narration: "So we introduce a stable address — a Service — that always
- * points at whatever copies are currently healthy. On every host, a little
- * component called kube-proxy programs the network so that traffic to the
- * Service gets routed to a live container."
+ * Scene 8 — A stable address with on-host routers (the names "Service" and
+ * "kube-proxy" are deferred until the reveal in scene 9).
+ * Narration: "So we introduce a stable address — one that always points at
+ * whatever copies are currently healthy. On every host, a little router
+ * programs the network so traffic to that stable address ends up at a live
+ * container. The client doesn't know or care which one."
  */
 export default makeScene2D(function* (view) {
   view.fill(theme.bg);
@@ -41,15 +42,14 @@ export default makeScene2D(function* (view) {
       <Container name="my-app" x={HOST_X} y={50} />
       <Client name="client" x={-870} y={0} />
 
-      {/* Service sits above the three hosts */}
-      <Service ref={service} x={0} y={-320} opacity={0} />
+      {/* The stable address (friendly name pre-reveal). */}
+      <Service ref={service} name="stable address" x={0} y={-320} opacity={0} />
 
-      {/* kube-proxy on each host, near the bottom-center */}
-      <KubeProxy ref={proxyA} x={-HOST_X} y={170} opacity={0} />
-      <KubeProxy ref={proxyB} x={0} y={170} opacity={0} />
-      <KubeProxy ref={proxyC} x={HOST_X} y={170} opacity={0} />
+      {/* Per-host router (friendly name pre-reveal). */}
+      <KubeProxy ref={proxyA} label="router" x={-HOST_X} y={170} opacity={0} />
+      <KubeProxy ref={proxyB} label="router" x={0} y={170} opacity={0} />
+      <KubeProxy ref={proxyC} label="router" x={HOST_X} y={170} opacity={0} />
 
-      {/* Client → Service */}
       <Line
         ref={clientToService}
         points={[[-780, 0], [-180, -320]]}
@@ -61,7 +61,6 @@ export default makeScene2D(function* (view) {
         end={0}
       />
 
-      {/* Service → each container, fanning out */}
       <Line
         ref={svcToA}
         points={[[0, -280], [-HOST_X, -20]]}
@@ -98,36 +97,36 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  yield* waitFor(0.4);
+  yield* waitFor(0.8);
 
-  // 1. Service fades in above the hosts.
-  yield* service().opacity(1, 0.5);
-  yield* waitFor(0.5);
+  // 1. The stable address appears above the hosts.
+  yield* service().opacity(1, 1);
+  yield* waitFor(1);
 
-  // 2. Service routes — dashed lines fan out from Service to each container.
+  // 2. Routing fan-out — dashed lines from the address to each container.
   yield* all(
-    svcToA().opacity(0.8, 0.3),
-    svcToA().end(1, 0.5, easeOutCubic),
-    svcToB().opacity(0.8, 0.3),
-    svcToB().end(1, 0.5, easeOutCubic),
-    svcToC().opacity(0.8, 0.3),
-    svcToC().end(1, 0.5, easeOutCubic),
+    svcToA().opacity(0.8, 0.6),
+    svcToA().end(1, 1, easeOutCubic),
+    svcToB().opacity(0.8, 0.6),
+    svcToB().end(1, 1, easeOutCubic),
+    svcToC().opacity(0.8, 0.6),
+    svcToC().end(1, 1, easeOutCubic),
   );
-  yield* waitFor(0.5);
+  yield* waitFor(1);
 
-  // 3. kube-proxy lights up on every host.
+  // 3. The on-host routers light up.
   yield* all(
-    proxyA().opacity(1, 0.4),
-    proxyB().opacity(1, 0.4),
-    proxyC().opacity(1, 0.4),
+    proxyA().opacity(1, 0.8),
+    proxyB().opacity(1, 0.8),
+    proxyC().opacity(1, 0.8),
   );
-  yield* waitFor(0.6);
+  yield* waitFor(1.2);
 
-  // 4. Client sends traffic toward the Service.
+  // 4. Client sends traffic toward the address.
   yield* all(
-    clientToService().opacity(1, 0.3),
-    clientToService().end(1, 0.5, easeOutCubic),
+    clientToService().opacity(1, 0.6),
+    clientToService().end(1, 1, easeOutCubic),
   );
 
-  yield* waitFor(2);
+  yield* waitFor(4);
 });

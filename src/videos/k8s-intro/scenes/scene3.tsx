@@ -40,24 +40,24 @@ export default makeScene2D(function* (view) {
   );
 
   // 1. Watcher appears inside the host, dashed leader line to the container.
-  yield* controller().opacity(1, 0.4);
+  yield* controller().opacity(1, 0.8);
   spawn(controller().idle());
   yield* all(
-    watchLine().opacity(0.6, 0.3),
-    watchLine().end(1, 0.5, easeOutCubic),
+    watchLine().opacity(0.6, 0.6),
+    watchLine().end(1, 1, easeOutCubic),
   );
-  yield* waitFor(0.8);
+  yield* waitFor(1.6);
 
   // 2. Container crashes — controller pulses, then container respawns.
   yield* container().crash();
   yield* controller().pulse();
-  yield* waitFor(0.3);
+  yield* waitFor(0.6);
   yield* container().restart();
-  yield* waitFor(0.8);
+  yield* waitFor(1.6);
 
   // 3. Loop once more so the viewer sees it's automatic.
   yield* container().crash();
   yield* controller().pulse();
   yield* container().restart();
-  yield* waitFor(1.5);
+  yield* waitFor(3);
 });

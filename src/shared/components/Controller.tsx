@@ -73,15 +73,15 @@ export class Controller extends Layout {
   }
 
   public *pulse(): ThreadGenerator {
-    yield* this.scale(1.2, 0.15);
-    yield* this.scale(1, 0.2);
+    yield* this.scale(1.2, 0.3);
+    yield* this.scale(1, 0.4);
   }
 
   /**
    * Continuous slow rotation of the gear shape only — label stays upright.
    * Run as a background task: `yield spawn(controller().idle())`.
    */
-  public *idle(secondsPerRotation = 8): ThreadGenerator {
+  public *idle(secondsPerRotation = 16): ThreadGenerator {
     yield* loop(Infinity, () =>
       this.gear.rotation(this.gear.rotation() + 360, secondsPerRotation, linear),
     );

@@ -245,58 +245,58 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  yield* waitFor(0.4);
+  yield* waitFor(0.8);
 
   // 1. Control plane region appears.
   yield* all(
-    cpRegion().opacity(0.6, 0.5),
-    cpLabel().opacity(1, 0.4),
+    cpRegion().opacity(0.6, 1),
+    cpLabel().opacity(1, 0.8),
   );
-  yield* waitFor(0.6);
+  yield* waitFor(1.2);
 
   // 2. kube-apiserver lights up first (the hub).
   yield* all(
-    apiserver().opacity(1, 0.4),
-    apiserverLabel().opacity(1, 0.4),
+    apiserver().opacity(1, 0.8),
+    apiserverLabel().opacity(1, 0.8),
   );
-  yield* waitFor(0.5);
+  yield* waitFor(1);
 
   // 3. etcd appears behind the apiserver.
   yield* all(
-    etcd().opacity(1, 0.4),
-    etcdLabel().opacity(1, 0.4),
+    etcd().opacity(1, 0.8),
+    etcdLabel().opacity(1, 0.8),
   );
-  yield* waitFor(0.5);
+  yield* waitFor(1);
 
   // 4. kube-scheduler.
   yield* all(
-    scheduler().opacity(1, 0.4),
-    schedulerLabel().opacity(1, 0.4),
+    scheduler().opacity(1, 0.8),
+    schedulerLabel().opacity(1, 0.8),
   );
-  yield* waitFor(0.5);
+  yield* waitFor(1);
 
   // 5. controller-manager with its little controllers.
   yield* all(
-    cmRect().opacity(1, 0.4),
-    cmLabel().opacity(1, 0.4),
+    cmRect().opacity(1, 0.8),
+    cmLabel().opacity(1, 0.8),
   );
   yield* sequence(
     0.1,
-    cmCtrl1().opacity(1, 0.3),
-    cmCtrl2().opacity(1, 0.3),
-    cmCtrl3().opacity(1, 0.3),
+    cmCtrl1().opacity(1, 0.6),
+    cmCtrl2().opacity(1, 0.6),
+    cmCtrl3().opacity(1, 0.6),
   );
-  yield* waitFor(0.6);
+  yield* waitFor(1.2);
 
   // 6. Arrows from each worker upward into the apiserver.
   yield* all(
-    upA().opacity(0.7, 0.3),
-    upA().end(1, 0.6, easeOutCubic),
-    upB().opacity(0.7, 0.3),
-    upB().end(1, 0.6, easeOutCubic),
-    upC().opacity(0.7, 0.3),
-    upC().end(1, 0.6, easeOutCubic),
+    upA().opacity(0.7, 0.6),
+    upA().end(1, 1.2, easeOutCubic),
+    upB().opacity(0.7, 0.6),
+    upB().end(1, 1.2, easeOutCubic),
+    upC().opacity(0.7, 0.6),
+    upC().end(1, 1.2, easeOutCubic),
   );
 
-  yield* waitFor(2);
+  yield* waitFor(4);
 });

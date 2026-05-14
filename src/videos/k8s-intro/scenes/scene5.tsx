@@ -82,22 +82,22 @@ export default makeScene2D(function* (view) {
 
   // 1. Hosts B and C slide in.
   yield* all(
-    hostB().position.x(-HOST_X, 0.7, easeOutCubic),
-    hostB().opacity(1, 0.6),
-    hostC().position.x(HOST_X, 0.7, easeOutCubic),
-    hostC().opacity(1, 0.6),
+    hostB().position.x(-HOST_X, 1.4, easeOutCubic),
+    hostB().opacity(1, 1.2),
+    hostC().position.x(HOST_X, 1.4, easeOutCubic),
+    hostC().opacity(1, 1.2),
   );
-  yield* waitFor(1.2);
+  yield* waitFor(2.4);
 
   // 2. Arrow appears, pointing down at Host B.
   yield* all(
-    placementArrow().opacity(1, 0.3),
-    placementArrow().end(1, 0.5, easeOutCubic),
+    placementArrow().opacity(1, 0.6),
+    placementArrow().end(1, 1, easeOutCubic),
   );
-  yield* waitFor(0.4);
+  yield* waitFor(0.8);
 
   // 3. Container fades in on Host B; arrow fades out.
-  yield* container().opacity(1, 0.5);
-  yield* placementArrow().opacity(0, 0.4);
-  yield* waitFor(2);
+  yield* container().opacity(1, 1);
+  yield* placementArrow().opacity(0, 0.8);
+  yield* waitFor(4);
 });

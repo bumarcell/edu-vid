@@ -22,7 +22,7 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  yield* waitFor(0.6);
+  yield* waitFor(1.2);
   yield* container().crash();
-  yield* waitFor(1.5);
+  yield* waitFor(3);
 });

@@ -30,13 +30,13 @@ export default makeScene2D(function* (view) {
 
   spawn(watcher().idle());
 
-  yield* waitFor(1.5);
+  yield* waitFor(3);
 
   // The whole host dies — host, container, and watcher all go dark.
   yield* all(
     host().die(),
-    container().opacity(0.2, 0.6),
-    watcher().opacity(0.2, 0.6),
+    container().opacity(0.2, 1.2),
+    watcher().opacity(0.2, 1.2),
   );
-  yield* waitFor(2);
+  yield* waitFor(4);
 });

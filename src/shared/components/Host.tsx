@@ -67,10 +67,19 @@ export class Host extends Rect {
 
   public *die(): ThreadGenerator {
     yield* all(
-      this.stroke(HOST_DEAD_COLOR, 0.6),
-      this.label.fill(HOST_DEAD_COLOR, 0.6),
-      this.separator.stroke(HOST_DEAD_COLOR, 0.6),
-      this.opacity(0.4, 0.6),
+      this.stroke(HOST_DEAD_COLOR, 1.2),
+      this.label.fill(HOST_DEAD_COLOR, 1.2),
+      this.separator.stroke(HOST_DEAD_COLOR, 1.2),
+      this.opacity(0.4, 1.2),
+    );
+  }
+
+  public *revive(duration = 1.2): ThreadGenerator {
+    yield* all(
+      this.stroke(theme.host, duration),
+      this.label.fill(theme.host, duration),
+      this.separator.stroke(theme.host, duration),
+      this.opacity(1, duration),
     );
   }
 }

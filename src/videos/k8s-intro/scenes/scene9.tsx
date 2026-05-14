@@ -1,5 +1,5 @@
 import {Layout, Line, makeScene2D, Rect, Txt} from '@motion-canvas/2d';
-import {all, createRef, easeOutCubic, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
 import {Client} from '@shared/components/Client';
 import {Container} from '@shared/components/Container';
 import {Host} from '@shared/components/Host';
@@ -12,10 +12,22 @@ const HOST_H = 420;
 const HOST_GAP = 60;
 const HOST_X = HOST_W + HOST_GAP;
 
+const TITLE_BIG = 140;
+const TITLE_SMALL = 56;
+const TITLE_RESTING_Y = -470;
+
 /**
  * Scene 9 — The reveal.
  * Narration: "And… congratulations. You've just re-invented Kubernetes.
  * Everything we just built has a name."
+ *
+ * Beats:
+ *   1. Hold on the full system.
+ *   2. Stage settles smaller.
+ *   3. Title lands huge over the center (recognition moment).
+ *   4. Title settles up; frame materializes; glow expands.
+ *   5. Components get their real K8s names — "stable address" → "Service"
+ *      (with a self-aware aside), "router" → "kube-proxy".
  */
 export default makeScene2D(function* (view) {
   view.fill(theme.bg);
@@ -23,6 +35,11 @@ export default makeScene2D(function* (view) {
   const stage = createRef<Layout>();
   const frame = createRef<Rect>();
   const title = createRef<Txt>();
+  const service = createRef<Service>();
+  const proxyA = createRef<KubeProxy>();
+  const proxyB = createRef<KubeProxy>();
+  const proxyC = createRef<KubeProxy>();
+  const serviceAside = createRef<Txt>();
 
   view.add(
     <>
@@ -34,11 +51,21 @@ export default makeScene2D(function* (view) {
         <Container name="my-app" x={0} y={50} />
         <Container name="my-app" x={HOST_X} y={50} />
         <Client name="client" x={-870} y={0} />
-        <Service x={0} y={-320} />
-        <KubeProxy x={-HOST_X} y={170} />
-        <KubeProxy x={0} y={170} />
-        <KubeProxy x={HOST_X} y={170} />
-        {/* Service → containers (kept from scene 8) */}
+        {/* Start with the friendly names from scene 8. */}
+        <Service ref={service} name="stable address" x={0} y={-320} />
+        <KubeProxy ref={proxyA} label="router" x={-HOST_X} y={170} />
+        <KubeProxy ref={proxyB} label="router" x={0} y={170} />
+        <KubeProxy ref={proxyC} label="router" x={HOST_X} y={170} />
+        <Txt
+          ref={serviceAside}
+          text="(unfortunate name, we know)"
+          x={0}
+          y={-395}
+          fontFamily={theme.font}
+          fontSize={18}
+          fill={theme.network}
+          opacity={0}
+        />
         <Line
           points={[[0, -280], [-HOST_X, -20]]}
           stroke={theme.service}
@@ -74,7 +101,6 @@ export default makeScene2D(function* (view) {
           arrowSize={12}
         />
       </Layout>
-      {/* The outer glowing frame — appears when we reveal "this is Kubernetes" */}
       <Rect
         ref={frame}
         width={1820}
@@ -83,31 +109,56 @@ export default makeScene2D(function* (view) {
         stroke={theme.highlight}
         lineWidth={4}
         shadowColor={theme.highlight}
-        shadowBlur={40}
+        shadowBlur={0}
         opacity={0}
+        scale={0.96}
       />
       <Txt
         ref={title}
         text="Kubernetes"
-        y={-470}
+        y={0}
         fontFamily={theme.font}
-        fontSize={56}
+        fontSize={TITLE_BIG}
         fill={theme.highlight}
         opacity={0}
+        scale={0.85}
       />
     </>,
   );
 
-  // 1. Brief hold on the full system.
+  // 1. Hold on the full system.
+  yield* waitFor(1.6);
+
+  // 2. Stage settles smaller to make room for the frame.
+  yield* stage().scale(0.82, 2, easeInOutCubic);
   yield* waitFor(0.6);
 
-  // 2. Pull back: scale the stage down to fit inside the new frame.
-  yield* stage().scale(0.82, 0.8, easeOutCubic);
+  // 3. Title lands huge over the center — the recognition moment.
+  yield* all(
+    title().opacity(1, 1, easeOutCubic),
+    title().scale(1, 1.4, easeOutCubic),
+  );
+  yield* waitFor(2.2);
 
-  // 3. The frame fades in around everything.
-  yield* frame().opacity(0.9, 0.7);
+  // 4. Title settles up; frame materializes with expanding glow.
+  yield* all(
+    title().position.y(TITLE_RESTING_Y, 1.8, easeInOutCubic),
+    title().fontSize(TITLE_SMALL, 1.8, easeInOutCubic),
+    frame().opacity(0.9, 1.4, easeOutCubic),
+    frame().scale(1, 1.8, easeOutCubic),
+    frame().shadowBlur(40, 2, easeOutCubic),
+  );
+  yield* waitFor(1.6);
 
-  // 4. The title drops in.
-  yield* title().opacity(1, 0.6);
-  yield* waitFor(2.5);
+  // 5. "Everything we just built has a name." Rename the friendly labels.
+  yield* service().renameTo('Service', 1.2);
+  yield* serviceAside().opacity(0.75, 0.8);
+  yield* waitFor(1.6);
+  yield* all(
+    proxyA().renameTo('kube-proxy', 1),
+    proxyB().renameTo('kube-proxy', 1),
+    proxyC().renameTo('kube-proxy', 1),
+  );
+
+  yield* waitFor(5);
 });

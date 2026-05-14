@@ -54,14 +54,14 @@ export default makeScene2D(function* (view) {
   );
 
   // 1. The cube grows from nothing.
-  yield* cube().scale(1, 0.9, easeOutCubic);
+  yield* cube().scale(1, 1.8, easeOutCubic);
 
   // 2. Title fades in inside the cube.
-  yield* title().opacity(1, 0.5);
+  yield* title().opacity(1, 1);
 
   // 3. Closing caption underneath.
-  yield* waitFor(1);
-  yield* caption().opacity(0.8, 0.6, easeInOutCubic);
+  yield* waitFor(2);
+  yield* caption().opacity(0.8, 1.2, easeInOutCubic);
 
-  yield* waitFor(3);
+  yield* waitFor(6);
 });
