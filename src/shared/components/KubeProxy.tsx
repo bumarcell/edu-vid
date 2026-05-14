@@ -39,11 +39,11 @@ export class KubeProxy extends Layout {
   }
 
   public *glow(): ThreadGenerator {
-    yield* this.chevron.fill(theme.service, 0.4);
+    yield* this.chevron.fill(theme.service, 0.3);
     yield* this.chevron.fill('rgba(0,0,0,0)', 0.3);
   }
 
-  public *renameTo(label: string, duration = 1): ThreadGenerator {
+  public *renameTo(label: string, duration = 0.75): ThreadGenerator {
     yield* this.labelNode.opacity(0, duration / 2);
     this.labelNode.text(label);
     yield* this.labelNode.opacity(1, duration / 2);

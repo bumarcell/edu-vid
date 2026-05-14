@@ -1,5 +1,5 @@
 import {makeScene2D} from '@motion-canvas/2d';
-import {all, createRef, spawn, waitFor} from '@motion-canvas/core';
+import {all, cancel, createRef, spawn, waitFor} from '@motion-canvas/core';
 import {Container} from '@shared/components/Container';
 import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
@@ -28,15 +28,19 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  spawn(watcher().idle());
+  const idleTask = spawn(watcher().idle());
 
-  yield* waitFor(3);
+  yield* waitFor(2.25);
 
-  // The whole host dies — host, container, and watcher all go dark.
+  // The whole host dies — host, container, and watcher all go dark, the
+  // gear loses its colour, and the rotation thread is canceled so the gear
+  // freezes.
   yield* all(
     host().die(),
-    container().opacity(0.2, 1.2),
-    watcher().opacity(0.2, 1.2),
+    container().opacity(0.5, 0.9),
+    watcher().opacity(0.5, 0.9),
+    watcher().die(0.9),
   );
-  yield* waitFor(4);
+  cancel(idleTask);
+  yield* waitFor(3);
 });

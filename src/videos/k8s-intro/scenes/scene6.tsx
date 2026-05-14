@@ -1,6 +1,7 @@
 import {Line, makeScene2D} from '@motion-canvas/2d';
-import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeInOutCubic, easeOutCubic, spawn, waitFor} from '@motion-canvas/core';
 import {Container} from '@shared/components/Container';
+import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
 import {theme} from '@shared/theme';
 
@@ -26,6 +27,9 @@ export default makeScene2D(function* (view) {
 
   const hostA = createRef<Host>();
   const hostB = createRef<Host>();
+  const watcherA = createRef<Controller>();
+  const watcherB = createRef<Controller>();
+  const watcherC = createRef<Controller>();
   const containerA = createRef<Container>();
   const containerB = createRef<Container>();
   const containerC = createRef<Container>();
@@ -44,6 +48,10 @@ export default makeScene2D(function* (view) {
       {/* Replicas waiting in their final positions; invisible until later. */}
       <Container ref={containerA} name="my-app" x={-HOST_X} y={50} opacity={0} />
       <Container ref={containerC} name="my-app" x={HOST_X} y={50} opacity={0} />
+      {/* Watchers: A is dead (in the center, with Host A), B and C alive. */}
+      <Controller ref={watcherA} label="watcher" dead x={0} y={-115} opacity={0.5} />
+      <Controller ref={watcherB} label="watcher" x={-HOST_X} y={-115} />
+      <Controller ref={watcherC} label="watcher" x={HOST_X} y={-115} />
       {/* Three request arrows clustered above the center (where B will land) */}
       <Line
         ref={arrow1}
@@ -81,46 +89,55 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  yield* waitFor(0.8);
+  // Alive watchers spin from the start; the dead one stays frozen.
+  spawn(watcherB().idle());
+  spawn(watcherC().idle());
+
+  yield* waitFor(0.6);
 
   // 1. Host A revives and slides left; Host B (with container) slides into
   //    the center. The shift happens as one synchronised animation rather
-  //    than as a cut.
+  //    than as a cut. The dead watcher on A revives and shifts with it.
   yield* all(
     hostA().revive(0.7),
-    hostA().position.x(-HOST_X, 1.8, easeInOutCubic),
-    hostB().position.x(0, 1.8, easeInOutCubic),
-    containerB().position.x(0, 1.8, easeInOutCubic),
+    hostA().position.x(-HOST_X, 1.35, easeInOutCubic),
+    hostB().position.x(0, 1.35, easeInOutCubic),
+    containerB().position.x(0, 1.35, easeInOutCubic),
+    watcherA().revive(0.7),
+    watcherA().opacity(1, 0.7),
+    watcherA().position.x(-HOST_X, 1.35, easeInOutCubic),
+    watcherB().position.x(0, 1.35, easeInOutCubic),
   );
-  yield* waitFor(0.8);
+  spawn(watcherA().idle()); // A is alive again — start its rotation
+  yield* waitFor(0.6);
 
   // 2. Traffic floods in — three arrows over container B.
   yield* all(
-    arrow1().opacity(1, 0.6),
-    arrow1().end(1, 0.8, easeOutCubic),
-    arrow2().opacity(1, 0.6),
-    arrow2().end(1, 0.8, easeOutCubic),
-    arrow3().opacity(1, 0.6),
-    arrow3().end(1, 0.8, easeOutCubic),
+    arrow1().opacity(1, 0.45),
+    arrow1().end(1, 0.6, easeOutCubic),
+    arrow2().opacity(1, 0.45),
+    arrow2().end(1, 0.6, easeOutCubic),
+    arrow3().opacity(1, 0.45),
+    arrow3().end(1, 0.6, easeOutCubic),
   );
 
   // 3. Container B strains under the load.
-  yield* containerB().scale(1.15, 0.6);
-  yield* containerB().scale(1, 0.6);
-  yield* waitFor(1.6);
+  yield* containerB().scale(1.15, 0.45);
+  yield* containerB().scale(1, 0.45);
+  yield* waitFor(1.2);
 
   // 4. Replicas appear on A and C.
   yield* all(
-    containerA().opacity(1, 1),
-    containerC().opacity(1, 1),
+    containerA().opacity(1, 0.75),
+    containerC().opacity(1, 0.75),
   );
-  yield* waitFor(0.6);
+  yield* waitFor(0.45);
 
   // 5. Arrows redistribute — one to each container.
   yield* all(
-    arrow1().position.x(-HOST_X, 1.2, easeOutCubic),
-    arrow3().position.x(HOST_X, 1.2, easeOutCubic),
+    arrow1().position.x(-HOST_X, 0.9, easeOutCubic),
+    arrow3().position.x(HOST_X, 0.9, easeOutCubic),
   );
 
-  yield* waitFor(4);
+  yield* waitFor(3);
 });

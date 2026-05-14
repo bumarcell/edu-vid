@@ -1,6 +1,7 @@
 import {Line, makeScene2D} from '@motion-canvas/2d';
-import {all, createRef, easeOutCubic, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeOutCubic, spawn, waitFor} from '@motion-canvas/core';
 import {Container} from '@shared/components/Container';
+import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
 import {theme} from '@shared/theme';
 
@@ -24,6 +25,8 @@ export default makeScene2D(function* (view) {
   const hostA = createRef<Host>();
   const hostB = createRef<Host>();
   const hostC = createRef<Host>();
+  const watcherB = createRef<Controller>();
+  const watcherC = createRef<Controller>();
   const container = createRef<Container>();
   const placementArrow = createRef<Line>();
 
@@ -37,6 +40,11 @@ export default makeScene2D(function* (view) {
         height={HOST_H}
         dead
       />
+      {/* Dead container and watcher persist inside Host A — they died with
+          the host at the end of scene 4 and remain at the same dim opacity
+          here so the cut from scene 4 → 5 is visually continuous. */}
+      <Container name="my-app" x={0} y={50} opacity={0.5} />
+      <Controller label="watcher" dead x={0} y={-115} opacity={0.5} />
       {/* Host B — slides in from off-screen left */}
       <Host
         ref={hostB}
@@ -53,6 +61,21 @@ export default makeScene2D(function* (view) {
         width={HOST_W}
         height={HOST_H}
         x={HOST_X + 300}
+        opacity={0}
+      />
+      {/* Watchers for the new alive hosts, sliding in alongside them. */}
+      <Controller
+        ref={watcherB}
+        label="watcher"
+        x={-HOST_X - 300}
+        y={-115}
+        opacity={0}
+      />
+      <Controller
+        ref={watcherC}
+        label="watcher"
+        x={HOST_X + 300}
+        y={-115}
         opacity={0}
       />
       {/* The new container will land on Host B */}
@@ -80,24 +103,30 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  // 1. Hosts B and C slide in.
+  // 1. Hosts B and C slide in, watchers tagging along on each.
   yield* all(
-    hostB().position.x(-HOST_X, 1.4, easeOutCubic),
-    hostB().opacity(1, 1.2),
-    hostC().position.x(HOST_X, 1.4, easeOutCubic),
-    hostC().opacity(1, 1.2),
+    hostB().position.x(-HOST_X, 1.05, easeOutCubic),
+    hostB().opacity(1, 0.9),
+    hostC().position.x(HOST_X, 1.05, easeOutCubic),
+    hostC().opacity(1, 0.9),
+    watcherB().position.x(-HOST_X, 1.05, easeOutCubic),
+    watcherB().opacity(1, 0.9),
+    watcherC().position.x(HOST_X, 1.05, easeOutCubic),
+    watcherC().opacity(1, 0.9),
   );
-  yield* waitFor(2.4);
+  spawn(watcherB().idle());
+  spawn(watcherC().idle());
+  yield* waitFor(1.8);
 
   // 2. Arrow appears, pointing down at Host B.
   yield* all(
-    placementArrow().opacity(1, 0.6),
-    placementArrow().end(1, 1, easeOutCubic),
+    placementArrow().opacity(1, 0.45),
+    placementArrow().end(1, 0.75, easeOutCubic),
   );
-  yield* waitFor(0.8);
+  yield* waitFor(0.6);
 
   // 3. Container fades in on Host B; arrow fades out.
-  yield* container().opacity(1, 1);
-  yield* placementArrow().opacity(0, 0.8);
-  yield* waitFor(4);
+  yield* container().opacity(1, 0.75);
+  yield* placementArrow().opacity(0, 0.6);
+  yield* waitFor(3);
 });

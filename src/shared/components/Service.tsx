@@ -48,7 +48,7 @@ export class Service extends Rect {
     this.add(this.ipLabel);
   }
 
-  public *renameTo(name: string, duration = 1): ThreadGenerator {
+  public *renameTo(name: string, duration = 0.75): ThreadGenerator {
     yield* this.nameLabel.opacity(0, duration / 2);
     this.nameLabel.text(name);
     yield* this.nameLabel.opacity(1, duration / 2);

@@ -9,6 +9,7 @@ export interface HostProps extends RectProps {
 }
 
 export const HOST_DEAD_COLOR = theme.hostDead;
+export const HOST_DEAD_OPACITY = 0.5;
 
 const HEADER_HEIGHT = 56;
 const SEPARATOR_INSET = 24;
@@ -61,20 +62,20 @@ export class Host extends Rect {
     this.add(this.separator);
 
     if (dead) {
-      this.opacity(0.4);
+      this.opacity(HOST_DEAD_OPACITY);
     }
   }
 
   public *die(): ThreadGenerator {
     yield* all(
-      this.stroke(HOST_DEAD_COLOR, 1.2),
-      this.label.fill(HOST_DEAD_COLOR, 1.2),
-      this.separator.stroke(HOST_DEAD_COLOR, 1.2),
-      this.opacity(0.4, 1.2),
+      this.stroke(HOST_DEAD_COLOR, 0.45),
+      this.label.fill(HOST_DEAD_COLOR, 0.45),
+      this.separator.stroke(HOST_DEAD_COLOR, 0.45),
+      this.opacity(HOST_DEAD_OPACITY, 0.9),
     );
   }
 
-  public *revive(duration = 1.2): ThreadGenerator {
+  public *revive(duration = 0.9): ThreadGenerator {
     yield* all(
       this.stroke(theme.host, duration),
       this.label.fill(theme.host, duration),

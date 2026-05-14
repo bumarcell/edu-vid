@@ -47,10 +47,10 @@ export default makeScene2D(function* (view) {
         <Host name="Host A" width={HOST_W} height={HOST_H} x={-HOST_X} />
         <Host name="Host B" width={HOST_W} height={HOST_H} x={0} />
         <Host name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
-        <Container name="my-app" x={-HOST_X} y={50} />
-        <Container name="my-app" x={0} y={50} />
-        <Container name="my-app" x={HOST_X} y={50} />
-        <Client name="client" x={-870} y={0} />
+        <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
+        <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
+        <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+        <Client name="client" x={-700} y={-320} />
         {/* Start with the friendly names from scene 8. */}
         <Service ref={service} name="stable address" x={0} y={-320} />
         <KubeProxy ref={proxyA} label="router" x={-HOST_X} y={170} />
@@ -94,7 +94,7 @@ export default makeScene2D(function* (view) {
           opacity={0.8}
         />
         <Line
-          points={[[-780, 0], [-180, -320]]}
+          points={[[-605, -320], [-180, -320]]}
           stroke={theme.network}
           lineWidth={2.5}
           endArrow
@@ -127,38 +127,38 @@ export default makeScene2D(function* (view) {
   );
 
   // 1. Hold on the full system.
-  yield* waitFor(1.6);
+  yield* waitFor(1.2);
 
   // 2. Stage settles smaller to make room for the frame.
-  yield* stage().scale(0.82, 2, easeInOutCubic);
-  yield* waitFor(0.6);
+  yield* stage().scale(0.82, 1.5, easeInOutCubic);
+  yield* waitFor(0.45);
 
   // 3. Title lands huge over the center — the recognition moment.
   yield* all(
-    title().opacity(1, 1, easeOutCubic),
-    title().scale(1, 1.4, easeOutCubic),
+    title().opacity(1, 0.75, easeOutCubic),
+    title().scale(1, 1.05, easeOutCubic),
   );
-  yield* waitFor(2.2);
+  yield* waitFor(1.65);
 
   // 4. Title settles up; frame materializes with expanding glow.
   yield* all(
-    title().position.y(TITLE_RESTING_Y, 1.8, easeInOutCubic),
-    title().fontSize(TITLE_SMALL, 1.8, easeInOutCubic),
-    frame().opacity(0.9, 1.4, easeOutCubic),
-    frame().scale(1, 1.8, easeOutCubic),
-    frame().shadowBlur(40, 2, easeOutCubic),
+    title().position.y(TITLE_RESTING_Y, 1.35, easeInOutCubic),
+    title().fontSize(TITLE_SMALL, 1.35, easeInOutCubic),
+    frame().opacity(0.9, 1.05, easeOutCubic),
+    frame().scale(1, 1.35, easeOutCubic),
+    frame().shadowBlur(40, 1.5, easeOutCubic),
   );
-  yield* waitFor(1.6);
+  yield* waitFor(1.2);
 
   // 5. "Everything we just built has a name." Rename the friendly labels.
-  yield* service().renameTo('Service', 1.2);
-  yield* serviceAside().opacity(0.75, 0.8);
-  yield* waitFor(1.6);
+  yield* service().renameTo('Service', 0.9);
+  yield* serviceAside().opacity(0.75, 0.6);
+  yield* waitFor(1.2);
   yield* all(
-    proxyA().renameTo('kube-proxy', 1),
-    proxyB().renameTo('kube-proxy', 1),
-    proxyC().renameTo('kube-proxy', 1),
+    proxyA().renameTo('kube-proxy', 0.75),
+    proxyB().renameTo('kube-proxy', 0.75),
+    proxyC().renameTo('kube-proxy', 0.75),
   );
 
-  yield* waitFor(5);
+  yield* waitFor(3.75);
 });
