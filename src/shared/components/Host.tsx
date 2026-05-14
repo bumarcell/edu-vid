@@ -8,7 +8,9 @@ export interface HostProps extends RectProps {
   dead?: boolean;
 }
 
-export const HOST_DEAD_COLOR = theme.hostDead;
+// A dead host is the same red as a failed container — one consistent
+// "this is down" color across the whole video.
+export const HOST_DEAD_COLOR = theme.containerFail;
 export const HOST_DEAD_OPACITY = 0.5;
 
 const HEADER_HEIGHT = 56;
@@ -68,19 +70,25 @@ export class Host extends Rect {
 
   public *die(): ThreadGenerator {
     yield* all(
-      this.stroke(HOST_DEAD_COLOR, 0.45),
-      this.label.fill(HOST_DEAD_COLOR, 0.45),
-      this.separator.stroke(HOST_DEAD_COLOR, 0.45),
-      this.opacity(HOST_DEAD_OPACITY, 0.9),
+      this.stroke(HOST_DEAD_COLOR, 0.3462),
+      this.label.fill(HOST_DEAD_COLOR, 0.3462),
+      this.separator.stroke(HOST_DEAD_COLOR, 0.3462),
+      this.opacity(HOST_DEAD_OPACITY, 0.6923),
     );
   }
 
-  public *revive(duration = 0.9): ThreadGenerator {
+  public *revive(duration = 0.6923): ThreadGenerator {
     yield* all(
       this.stroke(theme.host, duration),
       this.label.fill(theme.host, duration),
       this.separator.stroke(theme.host, duration),
       this.opacity(1, duration),
     );
+  }
+
+  public *renameTo(name: string, duration = 0.75): ThreadGenerator {
+    yield* this.label.opacity(0, duration / 2);
+    this.label.text(name);
+    yield* this.label.opacity(1, duration / 2);
   }
 }

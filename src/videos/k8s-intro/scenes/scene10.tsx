@@ -4,7 +4,6 @@ import {Client} from '@shared/components/Client';
 import {Container} from '@shared/components/Container';
 import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
-import {Kubelet} from '@shared/components/Kubelet';
 import {KubeProxy} from '@shared/components/KubeProxy';
 import {Service} from '@shared/components/Service';
 import {theme} from '@shared/theme';
@@ -17,12 +16,12 @@ const HOST_X = HOST_W + HOST_GAP;
 /**
  * Scene 10 — Naming the pieces (worker side).
  *
- * Opens in Scene 9's final state (frame, title, full system at 0.82 scale).
- * Beat 1 dismisses the reveal scaffolding — title, frame, client, service,
- * fan-out arrows — and zooms back in to full size. Beat 2 lands a
- * "Worker Node" callout. Beat 3 introduces kubelet on every host (with the
- * existing kube-proxies sliding right to make room). Beat 4 sends heartbeat
- * arrows up off-screen, setting up the control plane in scene 11.
+ * Opens in Scene 9's final state. Beat 1 dismisses the reveal scaffolding
+ * (frame, title, client, service, all arrows) and zooms the stage back to
+ * full size. Beat 2 lands the "Worker Node" callout. Beat 3 renames the
+ * cog on each host from "watcher" to "kubelet" — the cog *is* the kubelet.
+ * Beat 4 draws heartbeats upward from each cog, off-screen, setting up the
+ * control plane in Scene 11.
  *
  * Narration: "Each host is a worker node. On every worker runs a kubelet —
  * it's the thing that actually starts your containers, watches them, and
@@ -37,9 +36,6 @@ export default makeScene2D(function* (view) {
   const title = createRef<Txt>();
   const client = createRef<Client>();
   const service = createRef<Service>();
-  const proxyA = createRef<KubeProxy>();
-  const proxyB = createRef<KubeProxy>();
-  const proxyC = createRef<KubeProxy>();
   const watcherA = createRef<Controller>();
   const watcherB = createRef<Controller>();
   const watcherC = createRef<Controller>();
@@ -47,36 +43,27 @@ export default makeScene2D(function* (view) {
   const svcToB = createRef<Line>();
   const svcToC = createRef<Line>();
   const clientToService = createRef<Line>();
-  const workerNodeLabel = createRef<Txt>();
-  const kubeletA = createRef<Kubelet>();
-  const kubeletB = createRef<Kubelet>();
-  const kubeletC = createRef<Kubelet>();
   const heartbeatA = createRef<Line>();
   const heartbeatB = createRef<Line>();
   const heartbeatC = createRef<Line>();
 
-  // Final positions for kubelet + kube-proxy inside each host — symmetric
-  // around the host center, both at y=170.
-  const proxyOffset = 90;
-  const kubeletOffset = -90;
-
   view.add(
     <>
       <Layout ref={stage} scale={0.82}>
-        <Host name="Host A" width={HOST_W} height={HOST_H} x={-HOST_X} />
-        <Host name="Host B" width={HOST_W} height={HOST_H} x={0} />
-        <Host name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
+        <Host name="Worker Node" width={HOST_W} height={HOST_H} x={-HOST_X} />
+        <Host name="Worker Node" width={HOST_W} height={HOST_H} x={0} />
+        <Host name="Worker Node" width={HOST_W} height={HOST_H} x={HOST_X} />
         <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
         <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
         <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+        {/* The cog on each host — currently labeled "watcher" from scene 9.
+            Beat 3 renames each one to "kubelet". */}
         <Controller ref={watcherA} label="watcher" x={-HOST_X} y={-115} />
         <Controller ref={watcherB} label="watcher" x={0} y={-115} />
         <Controller ref={watcherC} label="watcher" x={HOST_X} y={-115} />
-        {/* kube-proxies open where they sat at the end of scene 9 — host
-            center — and slide right in beat 3 to make room for kubelets. */}
-        <KubeProxy ref={proxyA} label="kube-proxy" x={-HOST_X} y={170} />
-        <KubeProxy ref={proxyB} label="kube-proxy" x={0} y={170} />
-        <KubeProxy ref={proxyC} label="kube-proxy" x={HOST_X} y={170} />
+        <KubeProxy label="kube-proxy" x={-HOST_X} y={170} />
+        <KubeProxy label="kube-proxy" x={0} y={170} />
+        <KubeProxy label="kube-proxy" x={HOST_X} y={170} />
         <Client ref={client} name="client" x={-700} y={-320} />
         <Service ref={service} name="Service" x={0} y={-320} />
         <Line
@@ -117,23 +104,11 @@ export default makeScene2D(function* (view) {
           endArrow
           arrowSize={12}
         />
-        {/* Scene-10 additions — hidden until their beats. */}
-        <Txt
-          ref={workerNodeLabel}
-          text="Worker Node"
-          x={0}
-          y={-280}
-          fontFamily={theme.font}
-          fontSize={36}
-          fill={theme.host}
-          opacity={0}
-        />
-        <Kubelet ref={kubeletA} x={-HOST_X + kubeletOffset} y={170} opacity={0} />
-        <Kubelet ref={kubeletB} x={kubeletOffset} y={170} opacity={0} />
-        <Kubelet ref={kubeletC} x={HOST_X + kubeletOffset} y={170} opacity={0} />
+        {/* Heartbeats originate just above each cog (the kubelet) and head
+            off-screen above. */}
         <Line
           ref={heartbeatA}
-          points={[[-HOST_X + kubeletOffset, 140], [-HOST_X + kubeletOffset, -440]]}
+          points={[[-HOST_X, -160], [-HOST_X, -440]]}
           stroke={theme.host}
           lineWidth={2}
           lineDash={[6, 6]}
@@ -144,7 +119,7 @@ export default makeScene2D(function* (view) {
         />
         <Line
           ref={heartbeatB}
-          points={[[kubeletOffset, 140], [kubeletOffset, -440]]}
+          points={[[0, -160], [0, -440]]}
           stroke={theme.host}
           lineWidth={2}
           lineDash={[6, 6]}
@@ -155,7 +130,7 @@ export default makeScene2D(function* (view) {
         />
         <Line
           ref={heartbeatC}
-          points={[[HOST_X + kubeletOffset, 140], [HOST_X + kubeletOffset, -440]]}
+          points={[[HOST_X, -160], [HOST_X, -440]]}
           stroke={theme.host}
           lineWidth={2}
           lineDash={[6, 6]}
@@ -165,7 +140,6 @@ export default makeScene2D(function* (view) {
           end={0}
         />
       </Layout>
-      {/* Frame and title — present at the start to match scene 9's ending. */}
       <Rect
         ref={frame}
         width={1820}
@@ -192,47 +166,40 @@ export default makeScene2D(function* (view) {
   spawn(watcherB().idle());
   spawn(watcherC().idle());
 
-  yield* waitFor(0.6);
+  yield* waitFor(0.4615);
 
   // Beat 1 — fade out the reveal scaffolding and zoom back to full size.
   yield* all(
-    title().opacity(0, 0.7),
-    frame().opacity(0, 0.7),
-    frame().shadowBlur(0, 0.7),
-    client().opacity(0, 0.7),
-    service().opacity(0, 0.7),
-    svcToA().opacity(0, 0.7),
-    svcToB().opacity(0, 0.7),
-    svcToC().opacity(0, 0.7),
-    clientToService().opacity(0, 0.7),
-    stage().scale(1, 1.1, easeInOutCubic),
+    title().opacity(0, 0.5385),
+    frame().opacity(0, 0.5385),
+    frame().shadowBlur(0, 0.5385),
+    client().opacity(0, 0.5385),
+    service().opacity(0, 0.5385),
+    svcToA().opacity(0, 0.5385),
+    svcToB().opacity(0, 0.5385),
+    svcToC().opacity(0, 0.5385),
+    clientToService().opacity(0, 0.5385),
+    stage().scale(1, 0.8462, easeInOutCubic),
   );
-  yield* waitFor(0.45);
+  yield* waitFor(0.3462);
 
-  // Beat 2 — "Worker Node" callout lands over the middle host.
-  yield* workerNodeLabel().opacity(1, 0.6);
-  yield* waitFor(0.6);
-
-  // Beat 3 — kube-proxies slide right; kubelets fade in on every host.
+  // Beat 2 — the cog on each host gets its real name: kubelet.
   yield* all(
-    proxyA().position.x(-HOST_X + proxyOffset, 0.6, easeInOutCubic),
-    proxyB().position.x(proxyOffset, 0.6, easeInOutCubic),
-    proxyC().position.x(HOST_X + proxyOffset, 0.6, easeInOutCubic),
-    kubeletA().opacity(1, 0.5),
-    kubeletB().opacity(1, 0.5),
-    kubeletC().opacity(1, 0.5),
+    watcherA().renameTo('kubelet', 0.5769),
+    watcherB().renameTo('kubelet', 0.5769),
+    watcherC().renameTo('kubelet', 0.5769),
   );
-  yield* waitFor(0.6);
+  yield* waitFor(0.4615);
 
-  // Beat 4 — heartbeat arrows from each kubelet head upward off-screen.
+  // Beat 3 — heartbeats from each kubelet head upward off-screen.
   yield* all(
-    heartbeatA().opacity(0.6, 0.4),
-    heartbeatA().end(1, 0.75, easeOutCubic),
-    heartbeatB().opacity(0.6, 0.4),
-    heartbeatB().end(1, 0.75, easeOutCubic),
-    heartbeatC().opacity(0.6, 0.4),
-    heartbeatC().end(1, 0.75, easeOutCubic),
+    heartbeatA().opacity(0.6, 0.3077),
+    heartbeatA().end(1, 0.5769, easeOutCubic),
+    heartbeatB().opacity(0.6, 0.3077),
+    heartbeatB().end(1, 0.5769, easeOutCubic),
+    heartbeatC().opacity(0.6, 0.3077),
+    heartbeatC().end(1, 0.5769, easeOutCubic),
   );
 
-  yield* waitFor(3);
+  yield* waitFor(2.3077);
 });

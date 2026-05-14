@@ -43,7 +43,7 @@ export default makeScene2D(function* (view) {
       {/* Dead container and watcher persist inside Host A — they died with
           the host at the end of scene 4 and remain at the same dim opacity
           here so the cut from scene 4 → 5 is visually continuous. */}
-      <Container name="my-app" x={0} y={50} opacity={0.5} />
+      <Container name="my-app" ip="10.244.1.34" dead x={0} y={50} opacity={0.5} />
       <Controller label="watcher" dead x={0} y={-115} opacity={0.5} />
       {/* Host B — slides in from off-screen left */}
       <Host
@@ -82,6 +82,7 @@ export default makeScene2D(function* (view) {
       <Container
         ref={container}
         name="my-app"
+        ip="10.244.2.13"
         x={-HOST_X}
         y={50}
         opacity={0}
@@ -105,28 +106,28 @@ export default makeScene2D(function* (view) {
 
   // 1. Hosts B and C slide in, watchers tagging along on each.
   yield* all(
-    hostB().position.x(-HOST_X, 1.05, easeOutCubic),
-    hostB().opacity(1, 0.9),
-    hostC().position.x(HOST_X, 1.05, easeOutCubic),
-    hostC().opacity(1, 0.9),
-    watcherB().position.x(-HOST_X, 1.05, easeOutCubic),
-    watcherB().opacity(1, 0.9),
-    watcherC().position.x(HOST_X, 1.05, easeOutCubic),
-    watcherC().opacity(1, 0.9),
+    hostB().position.x(-HOST_X, 0.8077, easeOutCubic),
+    hostB().opacity(1, 0.6923),
+    hostC().position.x(HOST_X, 0.8077, easeOutCubic),
+    hostC().opacity(1, 0.6923),
+    watcherB().position.x(-HOST_X, 0.8077, easeOutCubic),
+    watcherB().opacity(1, 0.6923),
+    watcherC().position.x(HOST_X, 0.8077, easeOutCubic),
+    watcherC().opacity(1, 0.6923),
   );
   spawn(watcherB().idle());
   spawn(watcherC().idle());
-  yield* waitFor(1.8);
+  yield* waitFor(1.3846);
 
   // 2. Arrow appears, pointing down at Host B.
   yield* all(
-    placementArrow().opacity(1, 0.45),
-    placementArrow().end(1, 0.75, easeOutCubic),
+    placementArrow().opacity(1, 0.3462),
+    placementArrow().end(1, 0.5769, easeOutCubic),
   );
-  yield* waitFor(0.6);
+  yield* waitFor(0.4615);
 
   // 3. Container fades in on Host B; arrow fades out.
-  yield* container().opacity(1, 0.75);
-  yield* placementArrow().opacity(0, 0.6);
-  yield* waitFor(3);
+  yield* container().opacity(1, 0.5769);
+  yield* placementArrow().opacity(0, 0.4615);
+  yield* waitFor(2.3077);
 });

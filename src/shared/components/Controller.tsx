@@ -5,7 +5,9 @@ import {theme} from '../theme';
 const TEETH_COUNT = 8;
 const TOOTH_RADIUS = 28;
 const ALIVE_COLOR = theme.controlPlane;
-const DEAD_COLOR = theme.hostDead;
+// A dead watcher/kubelet shares the failed-container red, so the whole
+// "this is dead" palette is consistent.
+const DEAD_COLOR = theme.containerFail;
 
 /**
  * The gear shape itself — body circle, ring of teeth, center hub.
@@ -115,15 +117,22 @@ export class Controller extends Layout {
   }
 
   public *pulse(): ThreadGenerator {
-    yield* this.scale(1.2, 0.225);
-    yield* this.scale(1, 0.3);
+    yield* this.scale(1.2, 0.1731);
+    yield* this.scale(1, 0.2308);
+  }
+
+  public *renameTo(label: string, duration = 0.75): ThreadGenerator {
+    if (!this.labelNode) return;
+    yield* this.labelNode.opacity(0, duration / 2);
+    this.labelNode.text(label);
+    yield* this.labelNode.opacity(1, duration / 2);
   }
 
   /**
    * Continuous slow rotation of the gear shape only — label stays upright.
    * Run as a background task: `const t = spawn(controller().idle()); ... cancel(t)`.
    */
-  public *idle(secondsPerRotation = 12): ThreadGenerator {
+  public *idle(secondsPerRotation = 9.23): ThreadGenerator {
     yield* loop(Infinity, () =>
       this.gear.rotation(this.gear.rotation() + 360, secondsPerRotation, linear),
     );

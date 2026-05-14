@@ -18,11 +18,11 @@ export default makeScene2D(function* (view) {
   view.add(
     <>
       <Host name="Host A" />
-      <Container ref={container} name="my-app" y={50} />
+      <Container ref={container} name="my-app" ip="10.244.1.7" y={50} />
     </>,
   );
 
-  yield* waitFor(0.9);
+  yield* waitFor(0.6923);
   yield* container().crash();
-  yield* waitFor(2.25);
+  yield* waitFor(1.7308);
 });

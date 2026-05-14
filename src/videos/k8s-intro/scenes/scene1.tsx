@@ -20,7 +20,7 @@ export default makeScene2D(function* (view) {
   view.add(
     <>
       <Host ref={host} name="Host A" opacity={0} />
-      <Container ref={container} name="my-app" x={-400} opacity={0} />
+      <Container ref={container} name="my-app" ip="10.244.1.7" x={-400} opacity={0} />
       <Txt
         ref={caption}
         text="a container"
@@ -35,21 +35,21 @@ export default makeScene2D(function* (view) {
 
   // 1. Container slides in from off-screen left, caption appears below.
   yield* all(
-    container().position.x(0, 0.9, easeOutCubic),
-    container().opacity(1, 0.75),
+    container().position.x(0, 0.6923, easeOutCubic),
+    container().opacity(1, 0.5769),
   );
-  yield* caption().opacity(1, 0.6);
-  yield* waitFor(2.25);
+  yield* caption().opacity(1, 0.4615);
+  yield* waitFor(1.7308);
 
   // 2. "…let's abstract away where it runs — pretend it just lives somewhere,
   //    on some machine." Host fades in around the container; the container
   //    drops into its in-host position; the caption fades out.
   yield* all(
-    host().opacity(1, 1.05),
-    container().position.y(50, 1.05, easeOutCubic),
-    caption().opacity(0, 0.6),
+    host().opacity(1, 0.8077),
+    container().position.y(50, 0.8077, easeOutCubic),
+    caption().opacity(0, 0.4615),
   );
 
   // 3. "It's up. It's serving traffic. Life is good." Hold.
-  yield* waitFor(4.5);
+  yield* waitFor(3.4615);
 });

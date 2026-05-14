@@ -44,10 +44,10 @@ export default makeScene2D(function* (view) {
       <Host ref={hostA} name="Host A" width={HOST_W} height={HOST_H} x={0} dead />
       <Host ref={hostB} name="Host B" width={HOST_W} height={HOST_H} x={-HOST_X} />
       <Host name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
-      <Container ref={containerB} name="my-app" x={-HOST_X} y={50} />
+      <Container ref={containerB} name="my-app" ip="10.244.2.13" x={-HOST_X} y={50} />
       {/* Replicas waiting in their final positions; invisible until later. */}
-      <Container ref={containerA} name="my-app" x={-HOST_X} y={50} opacity={0} />
-      <Container ref={containerC} name="my-app" x={HOST_X} y={50} opacity={0} />
+      <Container ref={containerA} name="my-app" ip="10.244.1.7" x={-HOST_X} y={50} opacity={0} />
+      <Container ref={containerC} name="my-app" ip="10.244.0.41" x={HOST_X} y={50} opacity={0} />
       {/* Watchers: A is dead (in the center, with Host A), B and C alive. */}
       <Controller ref={watcherA} label="watcher" dead x={0} y={-115} opacity={0.5} />
       <Controller ref={watcherB} label="watcher" x={-HOST_X} y={-115} />
@@ -93,51 +93,51 @@ export default makeScene2D(function* (view) {
   spawn(watcherB().idle());
   spawn(watcherC().idle());
 
-  yield* waitFor(0.6);
+  yield* waitFor(0.4615);
 
   // 1. Host A revives and slides left; Host B (with container) slides into
   //    the center. The shift happens as one synchronised animation rather
   //    than as a cut. The dead watcher on A revives and shifts with it.
   yield* all(
     hostA().revive(0.7),
-    hostA().position.x(-HOST_X, 1.35, easeInOutCubic),
-    hostB().position.x(0, 1.35, easeInOutCubic),
-    containerB().position.x(0, 1.35, easeInOutCubic),
+    hostA().position.x(-HOST_X, 1.0385, easeInOutCubic),
+    hostB().position.x(0, 1.0385, easeInOutCubic),
+    containerB().position.x(0, 1.0385, easeInOutCubic),
     watcherA().revive(0.7),
-    watcherA().opacity(1, 0.7),
-    watcherA().position.x(-HOST_X, 1.35, easeInOutCubic),
-    watcherB().position.x(0, 1.35, easeInOutCubic),
+    watcherA().opacity(1, 0.5385),
+    watcherA().position.x(-HOST_X, 1.0385, easeInOutCubic),
+    watcherB().position.x(0, 1.0385, easeInOutCubic),
   );
   spawn(watcherA().idle()); // A is alive again — start its rotation
-  yield* waitFor(0.6);
+  yield* waitFor(0.4615);
 
   // 2. Traffic floods in — three arrows over container B.
   yield* all(
-    arrow1().opacity(1, 0.45),
-    arrow1().end(1, 0.6, easeOutCubic),
-    arrow2().opacity(1, 0.45),
-    arrow2().end(1, 0.6, easeOutCubic),
-    arrow3().opacity(1, 0.45),
-    arrow3().end(1, 0.6, easeOutCubic),
+    arrow1().opacity(1, 0.3462),
+    arrow1().end(1, 0.4615, easeOutCubic),
+    arrow2().opacity(1, 0.3462),
+    arrow2().end(1, 0.4615, easeOutCubic),
+    arrow3().opacity(1, 0.3462),
+    arrow3().end(1, 0.4615, easeOutCubic),
   );
 
   // 3. Container B strains under the load.
-  yield* containerB().scale(1.15, 0.45);
-  yield* containerB().scale(1, 0.45);
-  yield* waitFor(1.2);
+  yield* containerB().scale(1.15, 0.3462);
+  yield* containerB().scale(1, 0.3462);
+  yield* waitFor(0.9231);
 
   // 4. Replicas appear on A and C.
   yield* all(
-    containerA().opacity(1, 0.75),
-    containerC().opacity(1, 0.75),
+    containerA().opacity(1, 0.5769),
+    containerC().opacity(1, 0.5769),
   );
-  yield* waitFor(0.45);
+  yield* waitFor(0.3462);
 
   // 5. Arrows redistribute — one to each container.
   yield* all(
-    arrow1().position.x(-HOST_X, 0.9, easeOutCubic),
-    arrow3().position.x(HOST_X, 0.9, easeOutCubic),
+    arrow1().position.x(-HOST_X, 0.6923, easeOutCubic),
+    arrow3().position.x(HOST_X, 0.6923, easeOutCubic),
   );
 
-  yield* waitFor(3);
+  yield* waitFor(2.3077);
 });

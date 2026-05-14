@@ -1,30 +1,66 @@
-import {Circle, Line, makeScene2D, Polygon, Rect, Txt} from '@motion-canvas/2d';
-import {all, chain, createRef, easeOutCubic, sequence, waitFor} from '@motion-canvas/core';
+import {Circle, Layout, Line, makeScene2D, Polygon, Rect, Txt} from '@motion-canvas/2d';
+import {all, createRef, easeInOutCubic, easeOutCubic, linear, loop, sequence, spawn, ThreadGenerator, waitFor} from '@motion-canvas/core';
 import {Container} from '@shared/components/Container';
+import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
+import {KubeProxy} from '@shared/components/KubeProxy';
 import {theme} from '@shared/theme';
 
-const HOST_W = 360;
-const HOST_H = 260;
-const HOST_GAP = 50;
+const HOST_W = 480;
+const HOST_H = 420;
+const HOST_GAP = 60;
 const HOST_X = HOST_W + HOST_GAP;
-const WORKER_Y = 320;
+
+const STAGE_TARGET_SCALE = 0.7;
+const STAGE_TARGET_Y = 320;
 
 const CP_Y = -240;
 const CP_REGION_TOP = -360;
 const CP_REGION_BOTTOM = -120;
+const APISERVER_X = -260;
+const APISERVER_BOTTOM_Y = -145;
+
+// Cog (kubelet) stage-local position is (host_x, -115). After the stage
+// scales to 0.7 and shifts to y=320, find its world position and offset
+// up by enough to clear the cog visual.
+const cogWorld = (stageX: number) => ({
+  x: stageX * STAGE_TARGET_SCALE,
+  y: STAGE_TARGET_Y + -115 * STAGE_TARGET_SCALE,
+});
+const heartbeatStart = (stageX: number): [number, number] => {
+  const c = cogWorld(stageX);
+  // 32 (gear extent) + small gap, scaled by stage scale.
+  const offset = 36 * STAGE_TARGET_SCALE;
+  return [c.x, c.y - offset];
+};
+
+/**
+ * Continuous flowing-dash animation on a dashed line — suggests data
+ * traveling along the connection. Run as a background task via spawn().
+ */
+function* flowDashes(line: Line, period = 1.5): ThreadGenerator {
+  yield* loop(Infinity, function* () {
+    yield* line.lineDashOffset(line.lineDashOffset() - 12, period, linear);
+  });
+}
 
 /**
  * Scene 11 — The control plane.
- * Narration: "All of that reporting flows into the control plane — a
- * separate set of nodes whose only job is to run the brain of the cluster.
- * At the center is the kube-apiserver — every component talks through it.
- * Behind it, etcd — a key-value store that holds the entire desired state.
- * The kube-scheduler is the invisible hand from earlier. And the
- * controller-manager runs all those little watchers we kept inventing."
+ *
+ * Opens in Scene 10's end state. Stage scales down and shifts to the bottom
+ * half. Control plane lights up at the top. New dashed arrows fan up from
+ * each kubelet (cog) to the apiserver.
  */
 export default makeScene2D(function* (view) {
   view.fill(theme.bg);
+
+  const stage = createRef<Layout>();
+  const watcherA = createRef<Controller>();
+  const watcherB = createRef<Controller>();
+  const watcherC = createRef<Controller>();
+  const oldHbA = createRef<Line>();
+  const oldHbB = createRef<Line>();
+  const oldHbC = createRef<Line>();
 
   const cpRegion = createRef<Rect>();
   const cpLabel = createRef<Txt>();
@@ -39,21 +75,69 @@ export default makeScene2D(function* (view) {
   const cmCtrl1 = createRef<Circle>();
   const cmCtrl2 = createRef<Circle>();
   const cmCtrl3 = createRef<Circle>();
-  const upA = createRef<Line>();
-  const upB = createRef<Line>();
-  const upC = createRef<Line>();
+
+  const newHbA = createRef<Line>();
+  const newHbB = createRef<Line>();
+  const newHbC = createRef<Line>();
+
+  // Hub-spoke links between apiserver and each other CP component.
+  const linkEtcd = createRef<Line>();
+  const linkScheduler = createRef<Line>();
+  const linkCm = createRef<Line>();
+
+  const closingFrame = createRef<Rect>();
+
+  const apiserverTarget: [number, number] = [APISERVER_X, APISERVER_BOTTOM_Y];
 
   view.add(
     <>
-      {/* Worker nodes at the bottom — three small hosts with containers */}
-      <Host name="Worker Node" width={HOST_W} height={HOST_H} x={-HOST_X} y={WORKER_Y} />
-      <Host name="Worker Node" width={HOST_W} height={HOST_H} x={0} y={WORKER_Y} />
-      <Host name="Worker Node" width={HOST_W} height={HOST_H} x={HOST_X} y={WORKER_Y} />
-      <Container name="my-app" x={-HOST_X} y={WORKER_Y + 40} />
-      <Container name="my-app" x={0} y={WORKER_Y + 40} />
-      <Container name="my-app" x={HOST_X} y={WORKER_Y + 40} />
+      <Layout ref={stage}>
+        <Host name="Worker Node" width={HOST_W} height={HOST_H} x={-HOST_X} />
+        <Host name="Worker Node" width={HOST_W} height={HOST_H} x={0} />
+        <Host name="Worker Node" width={HOST_W} height={HOST_H} x={HOST_X} />
+        <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
+        <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
+        <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+        {/* Cogs already labeled "kubelet" from the end of scene 10. */}
+        <Controller ref={watcherA} label="kubelet" x={-HOST_X} y={-115} />
+        <Controller ref={watcherB} label="kubelet" x={0} y={-115} />
+        <Controller ref={watcherC} label="kubelet" x={HOST_X} y={-115} />
+        <KubeProxy label="kube-proxy" x={-HOST_X} y={170} />
+        <KubeProxy label="kube-proxy" x={0} y={170} />
+        <KubeProxy label="kube-proxy" x={HOST_X} y={170} />
+        {/* Short heartbeats from above each cog — fade during the pull-back. */}
+        <Line
+          ref={oldHbA}
+          points={[[-HOST_X, -160], [-HOST_X, -440]]}
+          stroke={theme.host}
+          lineWidth={2}
+          lineDash={[6, 6]}
+          endArrow
+          arrowSize={10}
+          opacity={0.6}
+        />
+        <Line
+          ref={oldHbB}
+          points={[[0, -160], [0, -440]]}
+          stroke={theme.host}
+          lineWidth={2}
+          lineDash={[6, 6]}
+          endArrow
+          arrowSize={10}
+          opacity={0.6}
+        />
+        <Line
+          ref={oldHbC}
+          points={[[HOST_X, -160], [HOST_X, -440]]}
+          stroke={theme.host}
+          lineWidth={2}
+          lineDash={[6, 6]}
+          endArrow
+          arrowSize={10}
+          opacity={0.6}
+        />
+      </Layout>
 
-      {/* Control plane region outline (the "brain of the cluster") */}
       <Rect
         ref={cpRegion}
         x={0}
@@ -75,12 +159,11 @@ export default makeScene2D(function* (view) {
         fontFamily={theme.font}
         fontSize={26}
         fill={theme.controlPlane}
-        opacity={0}
         textAlign="left"
         offset={[-1, 0]}
+        opacity={0}
       />
 
-      {/* etcd — leftmost, cylindrical */}
       <Rect
         ref={etcd}
         x={-660}
@@ -104,24 +187,22 @@ export default makeScene2D(function* (view) {
         opacity={0}
       />
 
-      {/* kube-apiserver — central hexagonal hub */}
       <Polygon
         ref={apiserver}
         sides={6}
-        x={-260}
+        x={APISERVER_X}
         y={CP_Y}
         width={190}
         height={190}
         stroke={theme.controlPlane}
         lineWidth={3}
         fill={theme.controlPlaneFill}
-        rotation={30}
         opacity={0}
       />
       <Txt
         ref={apiserverLabel}
         text={'kube-\napiserver'}
-        x={-260}
+        x={APISERVER_X}
         y={CP_Y}
         fontFamily={theme.font}
         fontSize={20}
@@ -130,7 +211,6 @@ export default makeScene2D(function* (view) {
         opacity={0}
       />
 
-      {/* kube-scheduler */}
       <Rect
         ref={scheduler}
         x={170}
@@ -154,7 +234,6 @@ export default makeScene2D(function* (view) {
         opacity={0}
       />
 
-      {/* controller-manager with three mini controllers inside */}
       <Rect
         ref={cmRect}
         x={620}
@@ -208,10 +287,38 @@ export default makeScene2D(function* (view) {
         opacity={0}
       />
 
-      {/* Heartbeat arrows from each worker up to the apiserver */}
+      {/* Hub-spoke links — apiserver is the hub, dashed lines flow data
+          out to each other component. */}
       <Line
-        ref={upA}
-        points={[[-HOST_X, WORKER_Y - HOST_H / 2], [-260, CP_Y + 100]]}
+        ref={linkEtcd}
+        points={[[-355, -240], [-595, -240]]}
+        stroke={theme.controlPlane}
+        lineWidth={1.5}
+        lineDash={[6, 6]}
+        opacity={0}
+      />
+      <Line
+        ref={linkScheduler}
+        points={[[-165, -240], [55, -240]]}
+        stroke={theme.controlPlane}
+        lineWidth={1.5}
+        lineDash={[6, 6]}
+        opacity={0}
+      />
+      <Line
+        ref={linkCm}
+        points={[[-165, -240], [475, -240]]}
+        stroke={theme.controlPlane}
+        lineWidth={1.5}
+        lineDash={[6, 6]}
+        opacity={0}
+      />
+
+      {/* New heartbeats fan from each kubelet's post-shift world position
+          to the apiserver. */}
+      <Line
+        ref={newHbA}
+        points={[heartbeatStart(-HOST_X), apiserverTarget]}
         stroke={theme.controlPlane}
         lineWidth={2}
         lineDash={[6, 6]}
@@ -221,8 +328,8 @@ export default makeScene2D(function* (view) {
         end={0}
       />
       <Line
-        ref={upB}
-        points={[[0, WORKER_Y - HOST_H / 2], [-260, CP_Y + 100]]}
+        ref={newHbB}
+        points={[heartbeatStart(0), apiserverTarget]}
         stroke={theme.controlPlane}
         lineWidth={2}
         lineDash={[6, 6]}
@@ -232,8 +339,8 @@ export default makeScene2D(function* (view) {
         end={0}
       />
       <Line
-        ref={upC}
-        points={[[HOST_X, WORKER_Y - HOST_H / 2], [-260, CP_Y + 100]]}
+        ref={newHbC}
+        points={[heartbeatStart(HOST_X), apiserverTarget]}
         stroke={theme.controlPlane}
         lineWidth={2}
         lineDash={[6, 6]}
@@ -241,62 +348,133 @@ export default makeScene2D(function* (view) {
         arrowSize={10}
         opacity={0}
         end={0}
+      />
+
+      {/* Closing frame — appears at the end of the scene, encloses the
+          full system, then collapses to nothing for the cut to scene 12. */}
+      <Rect
+        ref={closingFrame}
+        width={1820}
+        height={920}
+        radius={36}
+        stroke={theme.highlight}
+        lineWidth={4}
+        shadowColor={theme.highlight}
+        shadowBlur={0}
+        opacity={0}
       />
     </>,
   );
 
-  yield* waitFor(0.6);
+  spawn(watcherA().idle());
+  spawn(watcherB().idle());
+  spawn(watcherC().idle());
 
-  // 1. Control plane region appears.
-  yield* all(
-    cpRegion().opacity(0.6, 0.75),
-    cpLabel().opacity(1, 0.6),
-  );
-  yield* waitFor(0.9);
+  yield* waitFor(0.4615);
 
-  // 2. kube-apiserver lights up first (the hub).
   yield* all(
-    apiserver().opacity(1, 0.6),
-    apiserverLabel().opacity(1, 0.6),
+    stage().scale(STAGE_TARGET_SCALE, 0.9231, easeInOutCubic),
+    stage().position.y(STAGE_TARGET_Y, 0.9231, easeInOutCubic),
+    oldHbA().opacity(0, 0.5385),
+    oldHbB().opacity(0, 0.5385),
+    oldHbC().opacity(0, 0.5385),
   );
-  yield* waitFor(0.75);
+  yield* waitFor(0.3462);
 
-  // 3. etcd appears behind the apiserver.
   yield* all(
-    etcd().opacity(1, 0.6),
-    etcdLabel().opacity(1, 0.6),
+    cpRegion().opacity(0.6, 0.5769),
+    cpLabel().opacity(1, 0.4615),
   );
-  yield* waitFor(0.75);
+  yield* waitFor(0.4615);
 
-  // 4. kube-scheduler.
+  // kube-apiserver lights up.
   yield* all(
-    scheduler().opacity(1, 0.6),
-    schedulerLabel().opacity(1, 0.6),
+    apiserver().opacity(1, 0.4615),
+    apiserverLabel().opacity(1, 0.4615),
   );
-  yield* waitFor(0.75);
+  yield* waitFor(0.3077);
 
-  // 5. controller-manager with its little controllers.
+  // "every component talks through it" — heartbeats draw to the apiserver.
   yield* all(
-    cmRect().opacity(1, 0.6),
-    cmLabel().opacity(1, 0.6),
+    newHbA().opacity(0.7, 0.3077),
+    newHbA().end(1, 0.6923, easeOutCubic),
+    newHbB().opacity(0.7, 0.3077),
+    newHbB().end(1, 0.6923, easeOutCubic),
+    newHbC().opacity(0.7, 0.3077),
+    newHbC().end(1, 0.6923, easeOutCubic),
   );
+  yield* waitFor(0.4615);
+
+  // etcd appears with its link to apiserver flowing.
+  yield* all(
+    etcd().opacity(1, 0.4615),
+    etcdLabel().opacity(1, 0.4615),
+    linkEtcd().opacity(0.7, 0.5385),
+  );
+  spawn(flowDashes(linkEtcd()));
+  yield* waitFor(0.5769);
+
+  // kube-scheduler with its link.
+  yield* all(
+    scheduler().opacity(1, 0.4615),
+    schedulerLabel().opacity(1, 0.4615),
+    linkScheduler().opacity(0.7, 0.5385),
+  );
+  spawn(flowDashes(linkScheduler()));
+  yield* waitFor(0.5769);
+
+  // controller-manager with its link.
+  yield* all(
+    cmRect().opacity(1, 0.4615),
+    cmLabel().opacity(1, 0.4615),
+    linkCm().opacity(0.7, 0.5385),
+  );
+  spawn(flowDashes(linkCm()));
   yield* sequence(
-    0.1,
-    cmCtrl1().opacity(1, 0.45),
-    cmCtrl2().opacity(1, 0.45),
-    cmCtrl3().opacity(1, 0.45),
+    0.15,
+    cmCtrl1().opacity(1, 0.3462),
+    cmCtrl2().opacity(1, 0.3462),
+    cmCtrl3().opacity(1, 0.3462),
   );
-  yield* waitFor(0.9);
 
-  // 6. Arrows from each worker upward into the apiserver.
+  yield* waitFor(1.2308);
+
+  // Closing — a glowing frame envelops the full system, the contents fade
+  // out inside it, then the frame collapses to nothing. Scene 12 picks it
+  // up and reopens.
   yield* all(
-    upA().opacity(0.7, 0.45),
-    upA().end(1, 0.9, easeOutCubic),
-    upB().opacity(0.7, 0.45),
-    upB().end(1, 0.9, easeOutCubic),
-    upC().opacity(0.7, 0.45),
-    upC().end(1, 0.9, easeOutCubic),
+    closingFrame().opacity(0.9, 0.4615),
+    closingFrame().shadowBlur(40, 0.6154),
+  );
+  yield* waitFor(0.2308);
+
+  yield* all(
+    stage().opacity(0, 0.6154),
+    cpRegion().opacity(0, 0.6154),
+    cpLabel().opacity(0, 0.6154),
+    etcd().opacity(0, 0.6154),
+    etcdLabel().opacity(0, 0.6154),
+    apiserver().opacity(0, 0.6154),
+    apiserverLabel().opacity(0, 0.6154),
+    scheduler().opacity(0, 0.6154),
+    schedulerLabel().opacity(0, 0.6154),
+    cmRect().opacity(0, 0.6154),
+    cmLabel().opacity(0, 0.6154),
+    cmCtrl1().opacity(0, 0.6154),
+    cmCtrl2().opacity(0, 0.6154),
+    cmCtrl3().opacity(0, 0.6154),
+    linkEtcd().opacity(0, 0.6154),
+    linkScheduler().opacity(0, 0.6154),
+    linkCm().opacity(0, 0.6154),
+    newHbA().opacity(0, 0.6154),
+    newHbB().opacity(0, 0.6154),
+    newHbC().opacity(0, 0.6154),
   );
 
-  yield* waitFor(3);
+  yield* all(
+    closingFrame().size([0, 0], 0.8, easeInOutCubic),
+    closingFrame().shadowBlur(0, 0.6154),
+  );
+
+  yield* waitFor(0.3077);
 });

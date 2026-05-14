@@ -35,18 +35,22 @@ export default makeScene2D(function* (view) {
   const stage = createRef<Layout>();
   const frame = createRef<Rect>();
   const title = createRef<Txt>();
+  const hostA = createRef<Host>();
+  const hostB = createRef<Host>();
+  const hostC = createRef<Host>();
   const service = createRef<Service>();
   const proxyA = createRef<KubeProxy>();
   const proxyB = createRef<KubeProxy>();
   const proxyC = createRef<KubeProxy>();
   const serviceAside = createRef<Txt>();
+  const serviceAside2 = createRef<Txt>();
 
   view.add(
     <>
       <Layout ref={stage}>
-        <Host name="Host A" width={HOST_W} height={HOST_H} x={-HOST_X} />
-        <Host name="Host B" width={HOST_W} height={HOST_H} x={0} />
-        <Host name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
+        <Host ref={hostA} name="Host A" width={HOST_W} height={HOST_H} x={-HOST_X} />
+        <Host ref={hostB} name="Host B" width={HOST_W} height={HOST_H} x={0} />
+        <Host ref={hostC} name="Host C" width={HOST_W} height={HOST_H} x={HOST_X} />
         <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
         <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
         <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
@@ -61,6 +65,16 @@ export default makeScene2D(function* (view) {
           text="(unfortunate name, we know)"
           x={0}
           y={-395}
+          fontFamily={theme.font}
+          fontSize={18}
+          fill={theme.network}
+          opacity={0}
+        />
+        <Txt
+          ref={serviceAside2}
+          text="(really just kube-proxy config)"
+          x={0}
+          y={-425}
           fontFamily={theme.font}
           fontSize={18}
           fill={theme.network}
@@ -127,38 +141,49 @@ export default makeScene2D(function* (view) {
   );
 
   // 1. Hold on the full system.
-  yield* waitFor(1.2);
+  yield* waitFor(0.9231);
 
   // 2. Stage settles smaller to make room for the frame.
-  yield* stage().scale(0.82, 1.5, easeInOutCubic);
-  yield* waitFor(0.45);
+  yield* stage().scale(0.82, 1.1538, easeInOutCubic);
+  yield* waitFor(0.3462);
 
   // 3. Title lands huge over the center — the recognition moment.
   yield* all(
-    title().opacity(1, 0.75, easeOutCubic),
-    title().scale(1, 1.05, easeOutCubic),
+    title().opacity(1, 0.5769, easeOutCubic),
+    title().scale(1, 0.8077, easeOutCubic),
   );
-  yield* waitFor(1.65);
+  yield* waitFor(1.2692);
 
   // 4. Title settles up; frame materializes with expanding glow.
   yield* all(
-    title().position.y(TITLE_RESTING_Y, 1.35, easeInOutCubic),
-    title().fontSize(TITLE_SMALL, 1.35, easeInOutCubic),
-    frame().opacity(0.9, 1.05, easeOutCubic),
-    frame().scale(1, 1.35, easeOutCubic),
-    frame().shadowBlur(40, 1.5, easeOutCubic),
+    title().position.y(TITLE_RESTING_Y, 1.0385, easeInOutCubic),
+    title().fontSize(TITLE_SMALL, 1.0385, easeInOutCubic),
+    frame().opacity(0.9, 0.8077, easeOutCubic),
+    frame().scale(1, 1.0385, easeOutCubic),
+    frame().shadowBlur(40, 1.1538, easeOutCubic),
   );
-  yield* waitFor(1.2);
+  yield* waitFor(0.9231);
 
   // 5. "Everything we just built has a name." Rename the friendly labels.
-  yield* service().renameTo('Service', 0.9);
-  yield* serviceAside().opacity(0.75, 0.6);
-  yield* waitFor(1.2);
+  yield* service().renameTo('Service', 0.6923);
+  yield* serviceAside().opacity(0.75, 0.4615);
+  yield* waitFor(0.9231);
   yield* all(
-    proxyA().renameTo('kube-proxy', 0.75),
-    proxyB().renameTo('kube-proxy', 0.75),
-    proxyC().renameTo('kube-proxy', 0.75),
+    proxyA().renameTo('kube-proxy', 0.5769),
+    proxyB().renameTo('kube-proxy', 0.5769),
+    proxyC().renameTo('kube-proxy', 0.5769),
   );
+  yield* waitFor(0.6923);
+  yield* all(
+    hostA().renameTo('Worker Node', 0.5769),
+    hostB().renameTo('Worker Node', 0.5769),
+    hostC().renameTo('Worker Node', 0.5769),
+  );
+  yield* waitFor(0.9231);
 
-  yield* waitFor(3.75);
+  // 6. The technical-truth aside lands: Service isn't a real thing — it's
+  //    really just kube-proxy configuration.
+  yield* serviceAside2().opacity(0.75, 0.4615);
+
+  yield* waitFor(2.8846);
 });

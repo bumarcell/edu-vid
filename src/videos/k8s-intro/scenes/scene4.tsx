@@ -23,24 +23,25 @@ export default makeScene2D(function* (view) {
   view.add(
     <>
       <Host ref={host} name="Host A" />
-      <Container ref={container} name="my-app" y={50} />
+      <Container ref={container} name="my-app" ip="10.244.1.34" y={50} />
       <Controller ref={watcher} label="watcher" y={-115} />
     </>,
   );
 
   const idleTask = spawn(watcher().idle());
 
-  yield* waitFor(2.25);
+  yield* waitFor(1.7308);
 
-  // The whole host dies — host, container, and watcher all go dark, the
-  // gear loses its colour, and the rotation thread is canceled so the gear
-  // freezes.
+  // The whole host dies — host stroke, container, and watcher all shift to
+  // the failure-red palette and dim. The rotation thread is canceled so the
+  // gear freezes in place.
   yield* all(
     host().die(),
-    container().opacity(0.5, 0.9),
-    watcher().opacity(0.5, 0.9),
-    watcher().die(0.9),
+    container().opacity(0.5, 0.6923),
+    container().die(0.6923),
+    watcher().opacity(0.5, 0.6923),
+    watcher().die(0.6923),
   );
   cancel(idleTask);
-  yield* waitFor(3);
+  yield* waitFor(2.3077);
 });

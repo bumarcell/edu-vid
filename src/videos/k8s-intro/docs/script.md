@@ -103,7 +103,7 @@
 **Visual:** Hold on the full system. The stage settles smaller. The title **Kubernetes** lands huge over the center, then settles up to a header position while a glowing frame materializes around everything. Then the friendly labels morph into their real K8s names: "stable address" → "Service" (with a self-aware aside that the name is unfortunate), "router" → "kube-proxy".
 
 **Narration:**
-> And… congratulations. You've just re-invented Kubernetes. Everything we just built has a name. That stable address out there? In Kubernetes, it's called a **Service** — yes, the name is unfortunate. And those little routers on every host? Those are **kube-proxy**.
+> Well, that's basically Kubernetes. Everything we just built has a name. That stable address out there? In Kubernetes, it's called a **Service**. And those little routers on every host? Those are **kube-proxy**. And here's the thing — the Service isn't really a thing of its own. It's just configuration that tells the kube-proxies how to route. No box running anywhere; just rules the routers follow.
 
 → implemented in `src/videos/k8s-intro/scenes/scene9.tsx`
 

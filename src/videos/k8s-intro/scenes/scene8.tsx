@@ -1,7 +1,8 @@
 import {Line, makeScene2D} from '@motion-canvas/2d';
-import {all, createRef, easeOutCubic, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeOutCubic, spawn, waitFor} from '@motion-canvas/core';
 import {Client} from '@shared/components/Client';
 import {Container} from '@shared/components/Container';
+import {Controller} from '@shared/components/Controller';
 import {Host} from '@shared/components/Host';
 import {KubeProxy} from '@shared/components/KubeProxy';
 import {Service} from '@shared/components/Service';
@@ -27,6 +28,9 @@ export default makeScene2D(function* (view) {
   const proxyA = createRef<KubeProxy>();
   const proxyB = createRef<KubeProxy>();
   const proxyC = createRef<KubeProxy>();
+  const watcherA = createRef<Controller>();
+  const watcherB = createRef<Controller>();
+  const watcherC = createRef<Controller>();
   const clientToService = createRef<Line>();
   const svcToA = createRef<Line>();
   const svcToB = createRef<Line>();
@@ -40,6 +44,9 @@ export default makeScene2D(function* (view) {
       <Container name="my-app" ip="10.244.1.22" x={-HOST_X} y={50} />
       <Container name="my-app" ip="10.244.2.4" x={0} y={50} />
       <Container name="my-app" ip="10.244.0.58" x={HOST_X} y={50} />
+      <Controller ref={watcherA} label="watcher" x={-HOST_X} y={-115} />
+      <Controller ref={watcherB} label="watcher" x={0} y={-115} />
+      <Controller ref={watcherC} label="watcher" x={HOST_X} y={-115} />
       <Client name="client" x={-700} y={-320} />
 
       {/* The stable address (friendly name pre-reveal). */}
@@ -97,36 +104,40 @@ export default makeScene2D(function* (view) {
     </>,
   );
 
-  yield* waitFor(0.6);
+  spawn(watcherA().idle());
+  spawn(watcherB().idle());
+  spawn(watcherC().idle());
+
+  yield* waitFor(0.4615);
 
   // 1. The stable address appears above the hosts.
-  yield* service().opacity(1, 0.75);
-  yield* waitFor(0.75);
+  yield* service().opacity(1, 0.5769);
+  yield* waitFor(0.5769);
 
   // 2. Routing fan-out — dashed lines from the address to each container.
   yield* all(
-    svcToA().opacity(0.8, 0.45),
-    svcToA().end(1, 0.75, easeOutCubic),
-    svcToB().opacity(0.8, 0.45),
-    svcToB().end(1, 0.75, easeOutCubic),
-    svcToC().opacity(0.8, 0.45),
-    svcToC().end(1, 0.75, easeOutCubic),
+    svcToA().opacity(0.8, 0.3462),
+    svcToA().end(1, 0.5769, easeOutCubic),
+    svcToB().opacity(0.8, 0.3462),
+    svcToB().end(1, 0.5769, easeOutCubic),
+    svcToC().opacity(0.8, 0.3462),
+    svcToC().end(1, 0.5769, easeOutCubic),
   );
-  yield* waitFor(0.75);
+  yield* waitFor(0.5769);
 
   // 3. The on-host routers light up.
   yield* all(
-    proxyA().opacity(1, 0.6),
-    proxyB().opacity(1, 0.6),
-    proxyC().opacity(1, 0.6),
+    proxyA().opacity(1, 0.4615),
+    proxyB().opacity(1, 0.4615),
+    proxyC().opacity(1, 0.4615),
   );
-  yield* waitFor(0.9);
+  yield* waitFor(0.6923);
 
   // 4. Client sends traffic toward the address.
   yield* all(
-    clientToService().opacity(1, 0.45),
-    clientToService().end(1, 0.75, easeOutCubic),
+    clientToService().opacity(1, 0.3462),
+    clientToService().end(1, 0.5769, easeOutCubic),
   );
 
-  yield* waitFor(3);
+  yield* waitFor(2.3077);
 });

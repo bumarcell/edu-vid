@@ -1,0 +1,33 @@
+Say you have a container you want to run. For now, let's abstract away where it runs — pretend it just lives somewhere, on some machine. It's up. It's serving traffic. Life is good.
+
+…until, it crashes. Maybe a bug, maybe it ran out of memory — doesn't matter. It's gone. And now nothing is serving your traffic.
+
+So the first thing you'd want is something watching your container — and the moment it dies, bringing it back up. You don't want to be the one waking up at 3am to restart it.
+
+But what if it's not the container that fails — what if the whole machine it's running on goes down? Power, kernel panic, someone tripped over a cable. Now even your restart mechanism is gone.
+
+Okay, so let's add more machines. And critically — let's not pin our container to any specific one. We just say "run this thing," and something decides which host has room and puts it there. If a host dies, that something just picks another one.
+
+Now what if traffic spikes? One container can only do so much. But hey — we already have three hosts. Why not run three copies of the container, one per host, and split the work?
+
+Which raises a question: how does a client even find these copies? Their IPs change every time they get rescheduled. You don't want callers to care about that.
+
+So we introduce a stable address — one that always points at whatever copies are currently healthy. And on every host, a little router programs the network so traffic to that address ends up at a live container. The client doesn't know or care which one.
+
+Well, that's basically Kubernetes. Everything we just built has a name. That stable address out there? In Kubernetes, it's called a Service. And those little routers on every host? Those are kube-proxy. And here's the thing — the Service isn't really a thing of its own. It's just configuration that tells the kube-proxies how to route. No box running anywhere; just rules the routers follow.
+
+Each host is a worker node. On every worker runs a kubelet — it's the thing that actually starts your containers, watches them, and reports their status back up the chain. Next to it, the kube-proxy we already met, handling the network.
+
+All of that reporting flows into the control plane — a separate set of nodes whose only job is to run the brain of the cluster.
+
+At the center is the kube-apiserver — every component talks through it, nothing talks directly to anything else.
+
+Behind it, etcd — a key-value store that holds the entire desired state of the cluster. If etcd remembers "I want three copies of this container running," then etcd is the source of truth.
+
+The kube-scheduler is the invisible hand from earlier — when a new container needs a home, it picks which worker node has room.
+
+And the controller-manager runs all those little watchers we kept inventing — one controller notices a container died and asks for a replacement; another notices a whole node went silent and reschedules its workloads elsewhere. Dozens of these, each watching one kind of thing and nudging reality back toward what etcd says it should be.
+
+That's it — at least from far away. Kubernetes isn't magic; it's just the obvious set of things you'd build if you started with one container and kept asking "okay, but what if that breaks?"
+
+We named the pieces today, but we glossed over a lot — how the apiserver actually talks to etcd, what really happens inside the scheduler when it picks a node, how a controller goes from "I noticed something" to "I changed something." Plenty to dig into. We'll go deeper in the next ones.

@@ -1,9 +1,13 @@
-import {Layout, makeScene2D, Rect, Txt} from '@motion-canvas/2d';
+import {makeScene2D, Rect, Txt} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
 import {theme} from '@shared/theme';
 
 /**
  * Scene 12 — Closing.
+ *
+ * Picks up from Scene 11's closed frame (collapsed to size 0) and reopens
+ * it as a glowing Kubernetes cube. Title and outro caption follow.
+ *
  * Narration: "That's it — at least from far away. Kubernetes isn't magic;
  * it's just the obvious set of things you'd build if you started with one
  * container and kept asking 'okay, but what if that breaks?' We named the
@@ -12,25 +16,23 @@ import {theme} from '@shared/theme';
 export default makeScene2D(function* (view) {
   view.fill(theme.bg);
 
-  const cube = createRef<Rect>();
+  const frame = createRef<Rect>();
   const title = createRef<Txt>();
   const caption = createRef<Txt>();
 
-  // The video collapses to a single labeled cube. To keep this scene
-  // self-contained we don't try to recreate the full landscape; the
-  // crossfade from scene 11 carries the "everything shrinks" feeling.
   view.add(
-    <Layout>
+    <>
+      {/* Frame starts closed (size 0) to match scene 11's final state. */}
       <Rect
-        ref={cube}
-        width={280}
-        height={280}
+        ref={frame}
+        width={0}
+        height={0}
         radius={28}
         stroke={theme.highlight}
         lineWidth={4}
         shadowColor={theme.highlight}
-        shadowBlur={40}
-        scale={0}
+        shadowBlur={0}
+        opacity={0.9}
       />
       <Txt
         ref={title}
@@ -43,25 +45,30 @@ export default makeScene2D(function* (view) {
       />
       <Txt
         ref={caption}
-        text="more, soon."
+        text="more? like and comment =)"
         y={220}
         fontFamily={theme.font}
         fontSize={22}
         fill={theme.network}
         opacity={0}
       />
-    </Layout>,
+    </>,
   );
 
-  // 1. The cube grows from nothing.
-  yield* cube().scale(1, 1.35, easeOutCubic);
+  yield* waitFor(0.3077);
 
-  // 2. Title fades in inside the cube.
-  yield* title().opacity(1, 0.75);
+  // Reopen — frame grows from nothing to cube size; glow expands.
+  yield* all(
+    frame().size([280, 280], 1.05, easeOutCubic),
+    frame().shadowBlur(40, 0.9231),
+  );
 
-  // 3. Closing caption underneath.
-  yield* waitFor(1.5);
-  yield* caption().opacity(0.8, 0.9, easeInOutCubic);
+  // Title lands inside the cube.
+  yield* title().opacity(1, 0.4615);
 
-  yield* waitFor(4.5);
+  // Outro caption.
+  yield* waitFor(0.6923);
+  yield* caption().opacity(0.8, 0.5769, easeInOutCubic);
+
+  yield* waitFor(2.3077);
 });

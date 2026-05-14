@@ -22,7 +22,7 @@ export default makeScene2D(function* (view) {
   view.add(
     <>
       <Host name="Host A" />
-      <Container ref={container} name="my-app" y={50} />
+      <Container ref={container} name="my-app" ip="10.244.1.7" y={50} />
       <Controller ref={controller} label="watcher" y={-115} opacity={0} />
       <Line
         ref={watchLine}
@@ -40,24 +40,25 @@ export default makeScene2D(function* (view) {
   );
 
   // 1. Watcher appears inside the host, dashed leader line to the container.
-  yield* controller().opacity(1, 0.6);
+  yield* controller().opacity(1, 0.4615);
   spawn(controller().idle());
   yield* all(
-    watchLine().opacity(0.6, 0.45),
-    watchLine().end(1, 0.75, easeOutCubic),
+    watchLine().opacity(0.6, 0.3462),
+    watchLine().end(1, 0.5769, easeOutCubic),
   );
-  yield* waitFor(1.2);
+  yield* waitFor(0.9231);
 
-  // 2. Container crashes — controller pulses, then container respawns.
+  // 2. Container crashes — controller pulses, then container respawns
+  //    with a NEW IP (each pod gets a fresh address).
   yield* container().crash();
   yield* controller().pulse();
-  yield* waitFor(0.45);
-  yield* container().restart();
-  yield* waitFor(1.2);
+  yield* waitFor(0.3462);
+  yield* container().restart('10.244.1.19');
+  yield* waitFor(0.9231);
 
-  // 3. Loop once more so the viewer sees it's automatic.
+  // 3. Loop once more — another crash, another fresh IP.
   yield* container().crash();
   yield* controller().pulse();
-  yield* container().restart();
-  yield* waitFor(2.25);
+  yield* container().restart('10.244.1.34');
+  yield* waitFor(1.7308);
 });
